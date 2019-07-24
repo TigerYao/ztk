@@ -57,26 +57,18 @@ class NetUtils {
   static Future<HomeModel> requestData() async {
     HomeModel homeModel = HomeModel();
     var url = "http://m.yhdm.tv/";
-    var header = {
-      'Accept':
-          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-      'Accept-Encoding': 'gzip, deflate',
-      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-      'user-agent':
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
-    };
     var response = await http.get(url);
     if (response.statusCode == 200) {
       String htmBody =  Utf8Decoder().convert(response.bodyBytes);
       Document document = parse(htmBody);
-      print("body ==" + htmBody.toString());
+//      print("body ==" + htmBody.toString());
       List<Element> sortsInfo = document.querySelectorAll('.sort > a');
       for(var el in sortsInfo){
         homeModel.headerInfos.add(TvInfo(path: el.attributes['href'], title: el.text));
       }
-      print("headerInfos ==" +  homeModel.headerInfos.toString());
+//      print("headerInfos ==" +  homeModel.headerInfos.toString());
       List<Element> sliderElem = document.querySelectorAll('#slider > li');
-      print("sliderElem ==" + sliderElem.toString());
+//      print("sliderElem ==" + sliderElem.toString());
       for(var sl in sliderElem){
         Element sliderNode = sl.querySelector('a');
         Element picNode = sl.querySelector('img');
@@ -96,7 +88,28 @@ class NetUtils {
         }
         homeModel.tabListInfos.putIfAbsent(weekName, () => tListChildren);
       }
-      print("tabListInfos ==" +  homeModel.tabListInfos.toString());
+      List<Element> listEles = document.querySelectorAll('.listtit');
+      List<Element> listItemEles = document.querySelectorAll('.item');
+      int childIndex = 0;
+      for(int i = 0;i< listEles.length;i++){
+        Element element = listEles[i].querySelector('.listtitle');
+        TvInfo keyInfo = TvInfo(path: element.attributes['href'], title: element.querySelector('span').text);
+        List<TvInfo> values = List();
+        homeModel.catorgreList.putIfAbsent(keyInfo.title, () => values);
+        for(int j = childIndex; j < childIndex + 2 && j < listItemEles.length;j++){
+//          if (childIndex >= listItemEles.length) continue;
+          Element itemEle = listItemEles[j].querySelector('.itemtext');
+          String path = itemEle.attributes['href'];
+          String title = itemEle.text;
+          String pic = listItemEles[childIndex].querySelector('.imgblock').attributes['style'];
+          pic = pic.substring(pic.indexOf('http'), pic.lastIndexOf(')'));
+          TvInfo tvValue = TvInfo(path: path,title: title, picUrl: pic);
+          homeModel.catorgreList[keyInfo.title].add(tvValue);
+        }
+        childIndex += 2;
+      }
+//      print("catorgreList ==" + homeModel.catorgreList.toString());
+//      print("tabListInfos ==" +  homeModel.tabListInfos.toString());
       return homeModel;
     }
     return null;

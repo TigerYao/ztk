@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:huatu_flutter/model/recommend_info.dart';
-import 'package:huatu_flutter/utils/net_utils.dart';
-import 'package:huatu_flutter/model/top_info.dart';
 import 'package:huatu_flutter/model/home_model.dart';
+import 'package:huatu_flutter/utils/net_utils.dart';
 
 class HostPage extends StatefulWidget {
   @override
@@ -87,124 +84,36 @@ class _HostPageState extends State<HostPage> {
   }
 
   tvCataogryView() {
+    if (mHomeModel == null) return Text('动漫画');
     List<TvInfo> infos = mHomeModel.headerInfos;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: infos.map((tvInfo) {
-        return Text(tvInfo.title);
+        return Container(
+          padding: EdgeInsets.all(5),
+          child: Text(tvInfo.title, style: TextStyle(fontSize: 12, color:Colors.black),),
+        );
       }).toList(),
     );
   }
 
-//  radioView() {
-//    List<RadioInfo> radioInfos = mRecommendInfo.radioList;
-//    List<Widget> radioViews = List();
-//    for (RadioInfo info in radioInfos) {
-//      radioViews
-//        ..add(Container(
-//            margin: EdgeInsets.only(bottom: 20),
-//            padding: EdgeInsets.only(top: 10, bottom: 10, left: 5),
-//            width: MediaQuery.of(context).size.width / radioInfos.length - 10,
-//            child: Row(
-//              children: <Widget>[
-//                ClipRRect(
-//                  borderRadius: BorderRadius.circular(20),
-//                  child: Image.network(
-//                    info.picUrl,
-//                    fit: BoxFit.fill,
-//                    width: 40,
-//                  ),
-//                ),
-//                Padding(
-//                  padding: EdgeInsets.only(left: 5),
-//                  child: Text(
-//                    info.title,
-//                    style: TextStyle(color: Colors.white),
-//                  ),
-//                )
-//              ],
-//            ),
-//            decoration: BoxDecoration(
-//              borderRadius: BorderRadius.circular(10),
-//              gradient: const LinearGradient(
-//                  colors: [Color(0xFFC5E1A5), Color(0xFFAED581)]),
-//            )));
-//    }
-//    return Row(
-//      mainAxisAlignment: MainAxisAlignment.spaceAround,
-//      children: radioViews,
-//    );
-//  }
-
-//  contentView() {
-//    if (mTopModel == null || mTopModel.data == null || mTopModel.data.isEmpty)
-//      return Center(
-//        child: LinearProgressIndicator(),
-//      );
-//    else
-//      return ExpansionPanelList(
-//        animationDuration: Duration(milliseconds: 500),
-//        expansionCallback: (index, bol) {
-//          setState(() {
-//            mTopModel.data[index].isOpen = !bol;
-//          });
-//        },
-//        children: mTopModel.data.map((topInfo) {
-//          return ExpansionPanel(
-//              // 上下文 是否是打开的
-//              headerBuilder: (context, isExpanded) {
-//                return Container(
-//                  height: 40,
-//                  child: Row(
-//                    children: <Widget>[
-//                      Image.network(
-//                        topInfo.picUrl,
-//                        fit: BoxFit.cover,
-//                      ),
-//                      Text(topInfo.title)
-//                    ],
-//                  ),
-//                );
-//
-//                ListTile(title: Text(topInfo.title));
-//
-////                  Image.network(
-////                  topInfo.picUrl,
-////                  fit: BoxFit.cover,
-////                );
-//              },
-//              body: Container(
-//                    child: ListView.builder(
-//                        shrinkWrap: true,
-//                        physics: NeverScrollableScrollPhysics(),
-//                        itemCount: topInfo.songList.length,
-//                        itemBuilder: (context, index) {
-//                          return ListTile(
-//                              title: Text(topInfo.songList[index].singName));
-//                        }),
-//                  ),
-//              // 判断是否打开
-//              isExpanded: topInfo.isOpen);
-//        }).toList(),
-//      );
-////    return ListView.builder(
-////    itemCount: mTopModel.data.length,
-////    itemBuilder: (context, index){
-////    return
-////    })
-//  }
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return mHomeModel == null
-        ? Center(
-            child: CircularProgressIndicator(),
-          )
-        : SingleChildScrollView(
-            child: Column(
-              children: <Widget>[headerView(), tvCataogryView()],
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: tvCataogryView(),
+      ),
+      body: mHomeModel == null
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : SingleChildScrollView(
+              child: Column(
+                children: <Widget>[headerView()],
+              ),
             ),
-          );
+    );
   }
 }
