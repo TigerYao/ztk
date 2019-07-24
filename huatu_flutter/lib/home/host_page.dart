@@ -36,9 +36,9 @@ class _HostPageState extends State<HostPage> {
 //            mTopModel = value;
 //          });
 //      });
-  NetUtils.requestData().then((value) => setState((){
-    mHomeModel = value;
-  }));
+    NetUtils.requestData().then((value) => setState(() {
+          mHomeModel = value;
+        }));
   }
 
   headerView() {
@@ -66,7 +66,10 @@ class _HostPageState extends State<HostPage> {
                   alignment: Alignment.centerLeft,
                   width: MediaQuery.of(context).size.width,
                   color: Color(0xaF757575),
-                  child: Text(sliders[index].title, style: TextStyle(color: Colors.white),),
+                  child: Text(
+                    sliders[index].title,
+                    style: TextStyle(color: Colors.white),
+                  ),
                 )
               ],
             ),
@@ -83,9 +86,14 @@ class _HostPageState extends State<HostPage> {
     );
   }
 
-  tvCataogryView(){
+  tvCataogryView() {
     List<TvInfo> infos = mHomeModel.headerInfos;
-    infos.map(f)
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: infos.map((tvInfo) {
+        return Text(tvInfo.title);
+      }).toList(),
+    );
   }
 
 //  radioView() {
@@ -195,7 +203,7 @@ class _HostPageState extends State<HostPage> {
           )
         : SingleChildScrollView(
             child: Column(
-              children: <Widget>[headerView()],
+              children: <Widget>[headerView(), tvCataogryView()],
             ),
           );
   }
