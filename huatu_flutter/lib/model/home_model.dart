@@ -6,17 +6,27 @@ class HomeModel{
   Map<String, List<TvInfo>> catorgreList = Map();//分类
 }
 
+class TvDetailModel{
+  TvInfo currentInfo;
+  List<TvInfo> playLists;
+  List<TvInfo> recommendList;
+  List<TvInfo> tvTypes;
+}
+
 class TvInfo{
   String path;
-  String title = "";
+  String title;
   String picUrl;
   String number;
+  String videoUrl;
+  String tvDescription;
+  String createTime;
 
-  TvInfo({this.path, this.title, this.picUrl, this.number});
+  TvInfo({this.path, this.title, this.picUrl, this.number, this.videoUrl, this.tvDescription, this.createTime});
 
   @override
   String toString() {
     // TODO: implement toString
-    return "...dd.";
+    return "...[TvInfo]."+title;
   }
 }

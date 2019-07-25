@@ -28,6 +28,10 @@ dependencies:
   flutter_swiper: ^1.0.6
   html: ^0.14.0+2
   http: ^0.12.0+2
+  chewie: ^0.9.0
+  video_player: ^0.10.0+2
+  auto_orientation: ^0.0.2
+  flutter_webview_plugin: ^0.3.0+2
 
 dev_dependencies:
   flutter_test:
