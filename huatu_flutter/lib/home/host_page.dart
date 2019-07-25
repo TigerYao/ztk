@@ -15,6 +15,7 @@ class _HostPageState extends State<HostPage> {
 //  RecommendInfo mRecommendInfo;
 //  TopInfoModel mTopModel;
   HomeModel mHomeModel;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -95,6 +96,17 @@ class _HostPageState extends State<HostPage> {
         );
       }).toList(),
     );
+  }
+
+  weekView(){
+    return IndexedStack(
+      index: _currentIndex,
+      children: ,
+    );
+  }
+
+  weekItemView(){
+    return
   }
 
   @override
