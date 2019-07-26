@@ -4,6 +4,11 @@ class HomeModel{
   Map<String, List<TvInfo>> tabListInfos = Map();//最近更新，每天更新的 ，周一，周二
   List<TvInfo> infos = List();
   Map<String, List<TvInfo>> catorgreList = Map();//分类
+@override
+  String toString() {
+    // TODO: implement toString
+    return '[headerInfos]:'+headerInfos.toString()+"*****[sliderInfos]:"+sliderInfos.toString()+"*****[tabListInfos]:"+tabListInfos.toString()+"*****[infos]:"+infos.toString()+"******[categoryInfos]:"+catorgreList.toString();
+  }
 }
 
 class TvDetailModel{
@@ -29,4 +34,5 @@ class TvInfo{
     // TODO: implement toString
     return "...[TvInfo]."+title;
   }
+
 }

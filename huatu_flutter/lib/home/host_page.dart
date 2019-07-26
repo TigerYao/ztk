@@ -3,6 +3,7 @@ import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:huatu_flutter/model/home_model.dart';
 import 'package:huatu_flutter/utils/net_utils.dart';
 import 'detail_page.dart';
+import 'search_page.dart';
 
 class HostPage extends StatefulWidget {
   @override
@@ -17,13 +18,44 @@ class _HostPageState extends State<HostPage> {
 //  TopInfoModel mTopModel;
   HomeModel mHomeModel;
   String _currentValue = '周一';
+  int _currentHeadIndex = 0;
+  Map<String, Map<String, List<TvInfo>>> _mCataList;
+  Map<String, List<TvInfo>> _mCatogryTypeList;
+  Map<String, List<TvInfo>> _currentCatogrList;
+  List<TvInfo> _currentTypes;
 
   @override
   void initState() {
     super.initState();
-    NetUtils.requestData().then((value) => setState(() {
+    NetUtils.requestData(NetUtils.baseUrl).then((value) => setState(() {
+          if (_mCataList == null) _mCataList = Map();
+          if (_mCatogryTypeList == null) _mCatogryTypeList = Map();
           mHomeModel = value;
+          mHomeModel.headerInfos.insert(0, TvInfo(path: '/', title: '推荐'));
+          mHomeModel.headerInfos.insert(1, TvInfo(path: '//', title: '最新'));
+          _currentTypes = mHomeModel.infos;
+          _currentCatogrList = mHomeModel.catorgreList;
+          _mCataList.putIfAbsent(NetUtils.baseUrl, () {
+            return _currentCatogrList;
+          });
+          _mCatogryTypeList.putIfAbsent(NetUtils.baseUrl, () => _currentTypes);
         }));
+  }
+
+  fetchDatas(String url) {
+    if (_mCatogryTypeList.containsKey(url))
+      _currentTypes = _mCatogryTypeList[url];
+    if (_mCataList.containsKey(url)) _currentCatogrList = _mCataList[url];
+    if (!_mCatogryTypeList.containsKey(url) || !_mCataList.containsKey(url)) {
+      NetUtils.fetchDataByCategory(url).then((value) {
+        setState(() {
+          _currentTypes = value[0];
+          _currentCatogrList = value[1];
+          _mCataList.putIfAbsent(url, () => value[1]);
+          _mCatogryTypeList.putIfAbsent(url, () => value[0]);
+        });
+      });
+    }
   }
 
   headerView() {
@@ -63,7 +95,13 @@ class _HostPageState extends State<HostPage> {
         scrollDirection: Axis.horizontal,
         autoplay: true,
         onTap: (index) {
-          print('');
+          TvInfo f = sliders[index];
+          Navigator.push(
+            context,
+            new MaterialPageRoute(
+                builder: (context) =>
+                    new ChewieDemo(title: f.title, url: f.path)),
+          );
         },
         viewportFraction: 0.9,
         scale: 0.9,
@@ -74,18 +112,57 @@ class _HostPageState extends State<HostPage> {
   tvCataogryView() {
     if (mHomeModel == null) return Text('动漫画');
     List<TvInfo> infos = mHomeModel.headerInfos;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: infos.map((tvInfo) {
-        return Container(
-          padding: EdgeInsets.all(5),
-          child: Text(
-            tvInfo.title,
-            style: TextStyle(fontSize: 12, color: Colors.black),
-          ),
-        );
-      }).toList(),
-    );
+    return ListView.builder(
+        itemCount: infos.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          TvInfo tvInfo = infos[index];
+          return InkWell(
+            onTap: () {
+              if (_currentHeadIndex == index) return;
+              _currentHeadIndex = index;
+              String url = NetUtils.baseUrl;
+              _currentCatogrList = Map();
+              _currentTypes = List();
+              if (index == 0)
+                fetchDatas(url);
+              else if (index > 1) fetchDatas(url + tvInfo.path);
+              setState(() {});
+            },
+            child: Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(5),
+              child: Text(
+                tvInfo.title,
+                style: TextStyle(
+                    fontSize: 18,
+                    color:
+                        _currentHeadIndex == index ? Colors.red : Colors.black),
+              ),
+            ),
+          );
+        });
+
+//      Row(
+//      mainAxisAlignment: MainAxisAlignment.spaceAround,
+//      children: infos.map((tvInfo) {
+//        return InkWell(
+//          onTap: (){
+//            setState(() {
+//              _currentHeadIndex = infos.indexOf(tvInfo);
+//              _currentHeadTitle = tvInfo.title;
+//            });
+//          },
+//          child: Container(
+//            padding: EdgeInsets.all(5),
+//            child: Text(
+//              tvInfo.title,
+//              style: TextStyle(fontSize: 12, color: _currentHeadTitle == tvInfo.title ? Colors.red  : Colors.black),
+//            ),
+//          ),
+//        );
+//      }).toList(),
+//    );
   }
 
 //  weekView() {
@@ -154,13 +231,17 @@ class _HostPageState extends State<HostPage> {
   }
 
   tvContentView() {
+    print('****[infos:' +
+        _currentTypes.toString() +
+        "****[catogr]:" +
+        _currentCatogrList.toString());
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.all(10),
       child: Column(
-        children: mHomeModel.infos.map((tvInfo) {
+        children: _currentTypes.map((tvInfo) {
           String title = tvInfo.title;
-          List<TvInfo> tvList = mHomeModel.catorgreList[title];
+          List<TvInfo> tvList = _currentCatogrList[title];
           return Column(
             children: <Widget>[
               tvContentHeaderView(title),
@@ -181,7 +262,7 @@ class _HostPageState extends State<HostPage> {
           style: TextStyle(fontSize: 16, color: Colors.red),
         ),
         Text(
-          '更多',
+          '||',
           style: TextStyle(fontSize: 16, color: Colors.black),
         )
       ],
@@ -199,10 +280,12 @@ class _HostPageState extends State<HostPage> {
         TvInfo f = tvInfoList[index];
         return InkWell(
 //          padding: EdgeInsets.all(5),
-          onTap: (){
+          onTap: () {
             Navigator.push(
               context,
-              new MaterialPageRoute(builder: (context) => new ChewieDemo(title: f.title ,url: f.path)),
+              new MaterialPageRoute(
+                  builder: (context) =>
+                      new ChewieDemo(title: f.title, url: f.path)),
             );
           },
           child: Column(
@@ -210,7 +293,8 @@ class _HostPageState extends State<HostPage> {
             children: <Widget>[
               Image.network(
                 f.picUrl,
-                fit: BoxFit.cover,
+                fit: BoxFit.fitHeight,
+                height: 150,
               ),
               Container(
                 child: Text(
@@ -227,71 +311,10 @@ class _HostPageState extends State<HostPage> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
     );
-//      GridView.builder(
-//        itemCount: tvInfoList.length,
-//        itemBuilder: (BuildContext context, int index) {
-//          TvInfo f = tvInfoList[index];
-//          return Container(
-//          padding: EdgeInsets.all(10),
-//          child: Column(
-//            children: <Widget>[
-//              Image.network(
-//                f.picUrl,
-//                fit: BoxFit.cover,
-//              ),
-//              Text(f.title, softWrap: true)
-//            ],
-//          ),
-//        );
-//        },
-//        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-//          //单个子Widget的水平最大宽度
-//            maxCrossAxisExtent: MediaQuery.of(context).size.width/3,
-//            //水平单个子Widget之间间距
-//            mainAxisSpacing: 20.0,
-//            //垂直单个子Widget之间间距
-//            crossAxisSpacing: 10.0,
-//        ),
-//        shrinkWrap: true,
-//        physics: NeverScrollableScrollPhysics(),
-//      );
-
-//      GridView.count(
-//      shrinkWrap: true,
-//      //水平子Widget之间间距
-//      crossAxisSpacing: 10.0,
-//      //垂直子Widget之间间距
-//      mainAxisSpacing: 30.0,
-//      //GridView内边距
-//      padding: EdgeInsets.all(10.0),
-//      //一行的Widget数量
-//      crossAxisCount: 2,
-//      //子Widget宽高比例
-//      childAspectRatio: 2.0,
-//      //子Widget列表
-//      children: tvInfoList.map((f) {
-//        return Container(
-//          padding: EdgeInsets.all(10),
-//          width: MediaQuery.of(context).size.width / 2 - 20,
-//          child: Column(
-//            children: <Widget>[
-//              Image.network(
-//                f.picUrl,
-//                fit: BoxFit.cover,
-//                height: 80,
-//              ),
-//              Text(f.title, softWrap: true)
-//            ],
-//          ),
-//        );
-//      }).toList(),
-//      physics: NeverScrollableScrollPhysics(),
-//    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -303,13 +326,52 @@ class _HostPageState extends State<HostPage> {
             )
           : ListView(
               shrinkWrap: true,
-              children: <Widget>[
-                headerView(),
-//            weekItemHeader(),
-//            weekItemView(mHomeModel.tabListInfos[_currentValue]),
-                tvContentView()
-              ],
+              children: getChildren(),
             ),
     );
+  }
+
+  creatSearchView() {
+    return InkWell(
+      child: Container(
+        alignment: Alignment.centerLeft,
+        height: 40,
+        child: new Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            new Padding(
+              padding: new EdgeInsets.only(right: 10.0, top: 3.0, left: 10.0),
+              child: new Icon(Icons.search,
+                  size: 24.0, color: Theme.of(context).accentColor),
+            ),
+            new Expanded(
+              child: Text('一拳超人'),
+            )
+          ],
+        ),
+      ),
+      onTap: () {
+        Navigator.push(
+          context,
+          new MaterialPageRoute(
+              builder: (context) => SearchPage(
+                    placeholder: "进击的巨人全季",
+                  )),
+        );
+      },
+    );
+  }
+
+  List<Widget> getChildren() {
+    if (_currentHeadIndex == 1) {
+      return [
+        creatSearchView(),
+        headerView(),
+        weekItemHeader(),
+        weekItemView(mHomeModel.tabListInfos[_currentValue]),
+      ];
+    } else {
+      return [creatSearchView(), headerView(), tvContentView()];
+    }
   }
 }
