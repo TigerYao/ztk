@@ -8,10 +8,11 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart';
 import 'dart:convert';
+import 'covert.dart';
 
 class NetUtils {
   static const List weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-  static const String baseUrl = "http://m.yhdm.tv";
+  static const String baseUrl = "http://m.imomoe.io";//"http://m.yhdm.tv";
 
   static Future<RecommendInfo> getRecommendList() async {
     Dio _dio = DioFactory.getInstance().getDio();
@@ -55,10 +56,11 @@ class NetUtils {
   }
 
   static Future<String> getBody(String url) async {
-    print('getBody....' + url);
+    print('getBody.url...' +url);
     var response = await http.get(url);
     if (response.statusCode == 200) {
-      String htmBody = Utf8Decoder().convert(response.bodyBytes);
+      String htmBody = gbk.decode(response.bodyBytes);
+      print('getBody....' + htmBody);
       return htmBody;
     }
     return null;
@@ -69,16 +71,18 @@ class NetUtils {
     String htmBody = await getBody(url);
     if (htmBody != null) {
       Document document = parse(htmBody);
-//      print("body ==" + htmBody.toString());
+      print("body ==" + htmBody.toString());
       if (homeModel.headerInfos.isEmpty) {
-        List<Element> sortsInfo = document.querySelectorAll('.sort > a');
+        List<Element> sortsInfo = document.querySelectorAll('.am-offcanvas-bar > ul > li > a');//('.sort > a');
+        print("...sortsInfo...." + sortsInfo.toString());
         for (var el in sortsInfo) {
           homeModel.headerInfos
               .add(TvInfo(path: el.attributes['href'], title: el.text));
         }
       }
+      print("...headerInfos...." + homeModel.headerInfos.toString());
       if (homeModel.sliderInfos.isEmpty) {
-        List<Element> sliderElem = document.querySelectorAll('#slider > li');
+        List<Element> sliderElem = document.querySelectorAll('.am-slides > li');//('.am-list > li');
         for (var sl in sliderElem) {
           Element sliderNode = sl.querySelector('a');
           Element picNode = sl.querySelector('img');
@@ -102,22 +106,51 @@ class NetUtils {
 
   static Map<String, List<TvInfo>> getTabList(Document document) {
     Map<String, List<TvInfo>> mTabLists = Map();
-    List<Element> tListEles = document.querySelectorAll('.tlist > ul');
+    List<Element> tListEles = document.querySelectorAll('.am-tabs-bd > div > div > ul');
+//    print("==tListEles ==" +tListEles.toString());
     for (int i = 0; i < 7 && i < tListEles.length; i++) {
       String weekName = weekNames[i];
       List<Element> childNodes = tListEles[i].querySelectorAll('li');
       List<TvInfo> tListChildren = List();
       for (var tNode in childNodes) {
-        List<Element> info = tNode.querySelectorAll('a');
-        String tvNum = info[0].text;
-        String path = info[1].attributes['href'];
-        String title = info[1].text;
-//          print(info.toString() + "==tListEles ==" +path + "..."+tvNum);
+        Element info = tNode.querySelector('a');
+        String tvNum = tNode.querySelector('span').text;
+        String path = info.attributes['href'];
+        String title = info.text;
+          print(info.toString() + "==tListEles ==" +path + "..."+tvNum);
         tListChildren.add(TvInfo(path: path, number: tvNum, title: title));
       }
       mTabLists.putIfAbsent(weekName, () => tListChildren);
     }
     return mTabLists;
+  }
+  static List getCateList1(Document document) {
+    Map<String, List<TvInfo>> catorgreList = Map();
+    List<TvInfo> infos = List();
+    List<Element> listEles = document.querySelectorAll(' div > .am-titlebar-title');
+    List<Element> listElesNav = document.querySelectorAll(' div > .am-titlebar-nav > .am-icon-angle-right');
+    int childIndex = 0;
+    for (int i = 0; i < listEles.length; i++) {
+      Element elementtitle = listEles[i];
+      Element elementNav = listElesNav[i];
+        String path = elementNav.attributes.containsKey('href')
+            ? elementNav.attributes['href']
+            : '';
+        String title = elementtitle.text;
+        TvInfo keyInfo =
+        TvInfo(path: path, title: title);
+        List<TvInfo> values = List();
+        infos.add(keyInfo);
+        catorgreList.putIfAbsent(keyInfo.title, () => values);
+      List<Element> listItemEles = document.querySelectorAll('.list > ul');
+        for (int j = childIndex;
+        j < childIndex + 2 && j < listItemEles.length;
+        j++) {
+          catorgreList[keyInfo.title] = getListItem(listItemEles[j]);
+        }
+        childIndex += 2;
+    }
+    return [infos, catorgreList];
   }
 
   static List getCateList(Document document) {
