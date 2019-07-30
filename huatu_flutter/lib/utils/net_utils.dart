@@ -12,7 +12,7 @@ import 'covert.dart';
 
 class NetUtils {
   static const List weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-  static const String baseUrl = "http://m.imomoe.io";//"http://m.yhdm.tv";
+  static const String baseUrl = "http://m.imomoe.io"; //"http://m.yhdm.tv";
 
   static Future<RecommendInfo> getRecommendList() async {
     Dio _dio = DioFactory.getInstance().getDio();
@@ -56,7 +56,7 @@ class NetUtils {
   }
 
   static Future<String> getBody(String url) async {
-    print('getBody.url...' +url);
+    print('getBody.url...' + url);
     var response = await http.get(url);
     if (response.statusCode == 200) {
       String htmBody = gbk.decode(response.bodyBytes);
@@ -73,7 +73,8 @@ class NetUtils {
       Document document = parse(htmBody);
       print("body ==" + htmBody.toString());
       if (homeModel.headerInfos.isEmpty) {
-        List<Element> sortsInfo = document.querySelectorAll('.am-offcanvas-bar > ul > li > a');//('.sort > a');
+        List<Element> sortsInfo = document.querySelectorAll(
+            '.am-offcanvas-bar > ul > li > a'); //('.sort > a');
         print("...sortsInfo...." + sortsInfo.toString());
         for (var el in sortsInfo) {
           homeModel.headerInfos
@@ -82,7 +83,8 @@ class NetUtils {
       }
       print("...headerInfos...." + homeModel.headerInfos.toString());
       if (homeModel.sliderInfos.isEmpty) {
-        List<Element> sliderElem = document.querySelectorAll('.am-slides > li');//('.am-list > li');
+        List<Element> sliderElem =
+            document.querySelectorAll('.am-slides > li'); //('.am-list > li');
         for (var sl in sliderElem) {
           Element sliderNode = sl.querySelector('a');
           Element picNode = sl.querySelector('img');
@@ -95,7 +97,7 @@ class NetUtils {
       if (homeModel.tabListInfos.isEmpty) {
         homeModel.tabListInfos = getTabList(document);
       }
-      List catories = getCateList(document);
+      List catories = getCateList1(document);
       homeModel.infos = catories[0];
       homeModel.catorgreList = catories[1];
       print("...home...." + homeModel.toString());
@@ -106,7 +108,8 @@ class NetUtils {
 
   static Map<String, List<TvInfo>> getTabList(Document document) {
     Map<String, List<TvInfo>> mTabLists = Map();
-    List<Element> tListEles = document.querySelectorAll('.am-tabs-bd > div > div > ul');
+    List<Element> tListEles =
+        document.querySelectorAll('.am-tabs-bd > div > div > ul');
 //    print("==tListEles ==" +tListEles.toString());
     for (int i = 0; i < 7 && i < tListEles.length; i++) {
       String weekName = weekNames[i];
@@ -117,38 +120,74 @@ class NetUtils {
         String tvNum = tNode.querySelector('span').text;
         String path = info.attributes['href'];
         String title = info.text;
-          print(info.toString() + "==tListEles ==" +path + "..."+tvNum);
+        print(info.toString() + "==tListEles ==" + path + "..." + tvNum);
         tListChildren.add(TvInfo(path: path, number: tvNum, title: title));
       }
       mTabLists.putIfAbsent(weekName, () => tListChildren);
     }
     return mTabLists;
   }
+
   static List getCateList1(Document document) {
     Map<String, List<TvInfo>> catorgreList = Map();
     List<TvInfo> infos = List();
-    List<Element> listEles = document.querySelectorAll(' div > .am-titlebar-title');
-    List<Element> listElesNav = document.querySelectorAll(' div > .am-titlebar-nav > .am-icon-angle-right');
-    int childIndex = 0;
-    for (int i = 0; i < listEles.length; i++) {
-      Element elementtitle = listEles[i];
-      Element elementNav = listElesNav[i];
+
+    List<Element> listEles =
+        document.getElementsByClassName("am-titlebar-title ");
+    List<Element> listElesNav = document
+        .querySelectorAll(' div > .am-titlebar-nav > .am-icon-angle-right');
+    List<Element> listCategoriesElem = document.querySelectorAll('.am-gallery');
+    print(listEles.toString() + "......nav....");
+    if (listEles == null || listEles.isEmpty) {
+      List<TvInfo> values = List();
+      infos.add(TvInfo(title: '最新'));
+      catorgreList.putIfAbsent('最新', () => values);
+      listCategoriesElem = document.querySelectorAll('li > .am-gallery-item');
+      for (Element category in listCategoriesElem) {
+        String title = category.querySelector('.am-gallery-title').text;
+        String tvNum = category.querySelector('.am-gallery-desc').text;
+        String path = category.querySelector('a').attributes['href'];
+        String imgPathStr = category.querySelector('.lazy').outerHtml;
+        String imgPath = imgPathStr.substring(
+                imgPathStr.indexOf("http"), imgPathStr.indexOf('.jpg')) +
+            '.jpg';
+        print("imgPaht...." + imgPath);
+        catorgreList['最新'].add(
+            TvInfo(title: title, number: tvNum, path: path, picUrl: imgPath));
+      }
+    } else {
+      for (int i = 0; i < listEles.length; i++) {
+        Element elementtitle = listEles[i];
+        Element elementNav = listElesNav[i];
         String path = elementNav.attributes.containsKey('href')
             ? elementNav.attributes['href']
             : '';
         String title = elementtitle.text;
-        TvInfo keyInfo =
-        TvInfo(path: path, title: title);
+        TvInfo keyInfo = TvInfo(path: path, title: title);
         List<TvInfo> values = List();
         infos.add(keyInfo);
         catorgreList.putIfAbsent(keyInfo.title, () => values);
-      List<Element> listItemEles = document.querySelectorAll('.list > ul');
-        for (int j = childIndex;
-        j < childIndex + 2 && j < listItemEles.length;
-        j++) {
-          catorgreList[keyInfo.title] = getListItem(listItemEles[j]);
+        List<Element> cateEls = listCategoriesElem[i].querySelectorAll("li");
+        for (Element category in cateEls) {
+          String title = category.querySelector('.am-gallery-title').text;
+          String tvNum = category.querySelector('.am-gallery-desc').text;
+          String path =
+              category.querySelector('.am-gallery-item > a').attributes['href'];
+          String imgPathStr = category.querySelector('.lazy').outerHtml;
+          String imgPath = imgPathStr.substring(
+                  imgPathStr.indexOf("http"), imgPathStr.indexOf('.jpg')) +
+              '.jpg';
+          print("imgPaht...." + imgPath);
+          catorgreList[keyInfo.title].add(
+              TvInfo(title: title, number: tvNum, path: path, picUrl: imgPath));
         }
-        childIndex += 2;
+//        for (int j = childIndex;
+//        j < childIndex + 2 && j < listItemEles.length;
+//        j++) {
+//          catorgreList[keyInfo.title] = getListItem(listItemEles[j]);
+//        }
+//        childIndex += 2;
+      }
     }
     return [infos, catorgreList];
   }
@@ -167,9 +206,10 @@ class NetUtils {
             ? element.attributes['href']
             : '';
         print(element.outerHtml + "...outhtml....");
-        String title = element.querySelector('span') != null ? element.querySelector('span').text : element.text;
-        TvInfo keyInfo =
-            TvInfo(path: path, title: title);
+        String title = element.querySelector('span') != null
+            ? element.querySelector('span').text
+            : element.text;
+        TvInfo keyInfo = TvInfo(path: path, title: title);
         List<TvInfo> values = List();
         infos.add(keyInfo);
         catorgreList.putIfAbsent(keyInfo.title, () => values);
@@ -185,11 +225,11 @@ class NetUtils {
   }
 
   static Future<List> fetchDataByCategory(String url) async {
-    print('*****datacategory:'+url);
+    print('*****datacategory:' + url);
     String body = await getBody(url);
     if (body == null) return null;
     Document document = parse(body);
-    return getCateList(document);
+    return getCateList1(document);
   }
 
   ///**
@@ -267,15 +307,51 @@ class NetUtils {
     Document document = parse(body);
     String videoUrl =
         document.querySelector('.player > div').attributes['data-vid'];
-//    if (videoUrl == null || videoUrl.endsWith('mp4') || videoUrl.endsWith('m3u8'))
     return videoUrl.replaceAll('\$', '.');
-//    else{
-//      String videoBody = await getBody(videoUrl);
-//      Document document = parse(videoBody);
-//      String element = document.body.querySelectorAll('script')[2].text;
-//      print('video_elem....' + element);
-//      element = element.substring(element.indexOf('url:')+5, element.indexOf('m3u8') + 4);
-//      return element;
-//    }
+  }
+
+  static Future<TvDetailModel> getIntro(String url) async {
+    String body = await getBody(url);
+    if (body == null) return null;
+    TvDetailModel detailModel = TvDetailModel();
+    Document document = parse(body);
+    String title = document.querySelector('.am-header-title').text;
+    Element element = document.querySelector('.am-intro-left > img');
+    String picPath = element.attributes['src'];
+    List<Element> infoElement = document.querySelectorAll('#p-info > p');
+    List<String> tags = List();
+    for (Element ele in infoElement) {
+      if (ele.querySelector('a') != null) {
+        List<Element> aTags = ele.querySelectorAll('a');
+        StringBuffer sb = StringBuffer();
+        for (Element atag in aTags) {
+          sb.write(atag.text + "      ");
+        }
+        tags.add(sb.toString());
+      } else
+        tags.add(ele.text);
+    }
+    print('tags == ' + tags.toString());
+    Element elementA = document.querySelector('#p-info > a');
+    String currentPath = elementA.attributes['href'];
+    String description = document.querySelector('.txtDesc').text;
+    detailModel.currentInfo = TvInfo(
+        path: currentPath,
+        tvDescription: description,
+        title: title,
+        picUrl: picPath);
+    detailModel.currentInfo.tags = tags;
+    detailModel.playLists = List();
+    List<Element> videoEles = document.querySelectorAll('.mvlist > li');
+    for (Element videoEl in videoEles) {
+      Element videoAEl = videoEl.querySelector('a');
+      String videoPath = videoAEl.attributes['href'];
+      String titleNum = videoAEl.attributes['title'];
+      print('____list。。。。' + videoPath + "...." + titleNum);
+      detailModel.playLists
+          .add(TvInfo(path: videoPath, title: title, number: titleNum));
+    }
+
+    return detailModel;
   }
 }

@@ -26,6 +26,7 @@ class TvInfo{
   String videoUrl;
   String tvDescription;
   String createTime;
+  List<String> tags;
 
   TvInfo({this.path, this.title, this.picUrl, this.number, this.videoUrl, this.tvDescription, this.createTime});
 
