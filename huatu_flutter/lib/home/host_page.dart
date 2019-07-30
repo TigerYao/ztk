@@ -355,7 +355,7 @@ class _HostPageState extends State<HostPage> {
           context,
           new MaterialPageRoute(
               builder: (context) => SearchPage(
-                    placeholder: "进击的巨人全季",
+                    placeholder: "进击的巨人全季", path: '/search/',
                   )),
         );
       },

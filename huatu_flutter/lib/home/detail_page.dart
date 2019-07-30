@@ -1,10 +1,7 @@
 import 'package:auto_orientation/auto_orientation.dart';
-import 'package:chewie/chewie.dart';
-import 'package:chewie/src/chewie_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
 import 'package:huatu_flutter/utils/net_utils.dart';
 import 'comment_webview.dart';
 
@@ -21,10 +18,6 @@ class ChewieDemo extends StatefulWidget {
 }
 
 class _ChewieDemoState extends State<ChewieDemo> {
-  TargetPlatform _platform;
-  VideoPlayerController _videoPlayerController1;
-  VideoPlayerController _videoPlayerController2;
-  ChewieController _chewieController;
   String videoUrl;
 
   @override
@@ -37,44 +30,6 @@ class _ChewieDemoState extends State<ChewieDemo> {
         print(videoUrl + "...video..");
       });
     });
-  }
-
-  _initView(String videoUrl) {
-    print(videoUrl + "...video..");
-    _videoPlayerController1 = VideoPlayerController.network('https://www3.kkzy-qq.com/hls/2019/07/24/TlY93P1Z/playlist.m3u8');
-    _videoPlayerController2 = VideoPlayerController.network(
-        'https://www3.kkzy-qq.com/hls/2019/07/24/TlY93P1Z/playlist.m3u8');
-    _chewieController = ChewieController(
-        videoPlayerController: _videoPlayerController1,
-        aspectRatio: 3 / 2,
-        autoPlay: true,
-        looping: true,
-        routePageBuilder: (BuildContext context, Animation<double> animation,
-            Animation<double> secondAnimation, provider) {
-          return AnimatedBuilder(
-            animation: animation,
-            builder: (BuildContext context, Widget child) {
-              return VideoScaffold(
-                child: Scaffold(
-                  resizeToAvoidBottomPadding: false,
-                  body: Container(
-                    alignment: Alignment.center,
-                    color: Colors.black,
-                    child: provider,
-                  ),
-                ),
-              );
-            },
-          );
-        });
-  }
-
-  @override
-  void dispose() {
-    _videoPlayerController1.dispose();
-    _videoPlayerController2.dispose();
-    _chewieController.dispose();
-    super.dispose();
   }
 
   @override

@@ -1,13 +1,14 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart' show parse;
+import 'package:http/http.dart' as http;
 import 'package:huatu_flutter/api/api.dart';
 import 'package:huatu_flutter/api/dio_factory.dart';
-import 'package:huatu_flutter/model/recommend_info.dart';
 import 'package:huatu_flutter/model/home_model.dart';
-import 'package:dio/dio.dart';
+import 'package:huatu_flutter/model/recommend_info.dart';
 import 'package:huatu_flutter/model/top_info.dart';
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
-import 'package:html/dom.dart';
-import 'dart:convert';
 
 class NetUtils {
   static const List weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
@@ -134,16 +135,17 @@ class NetUtils {
             ? element.attributes['href']
             : '';
         print(element.outerHtml + "...outhtml....");
-        String title = element.querySelector('span') != null ? element.querySelector('span').text : element.text;
-        TvInfo keyInfo =
-            TvInfo(path: path, title: title);
+        String title = element.querySelector('span') != null
+            ? element.querySelector('span').text
+            : element.text;
+        TvInfo keyInfo = TvInfo(path: path, title: title);
         List<TvInfo> values = List();
         infos.add(keyInfo);
         catorgreList.putIfAbsent(keyInfo.title, () => values);
         for (int j = childIndex;
             j < childIndex + 2 && j < listItemEles.length;
             j++) {
-          catorgreList[keyInfo.title] = getListItem(listItemEles[j]);
+          catorgreList[keyInfo.title].addAll(getListItem(listItemEles[j]));
         }
         childIndex += 2;
       }
@@ -152,7 +154,7 @@ class NetUtils {
   }
 
   static Future<List> fetchDataByCategory(String url) async {
-    print('*****datacategory:'+url);
+    print('*****datacategory:' + url);
     String body = await getBody(url);
     if (body == null) return null;
     Document document = parse(body);
@@ -166,15 +168,16 @@ class NetUtils {
   ///       <li class = item>这一层解析
   ///
   static List<TvInfo> getListItem(Element itemParent) {
+    print("listiem.." + itemParent.outerHtml);
     List<TvInfo> tListChildren = List();
     List<Element> itemEls = itemParent.querySelectorAll('.item');
+    if (itemEls.isEmpty) return null;
     for (var ite in itemEls) {
       Element itemEle = ite.querySelector('.itemtext');
       String path = itemEle.attributes['href'];
       String title = itemEle.text;
       String pic = ite.querySelector('.imgblock').attributes['style'];
       pic = pic.substring(pic.indexOf('http'), pic.lastIndexOf('\')'));
-      print("pic ==" + pic);
       tListChildren.add(TvInfo(path: path, title: title, picUrl: pic));
     }
     return tListChildren;
@@ -232,8 +235,10 @@ class NetUtils {
     String body = await getBody(url);
     if (body == null) return null;
     Document document = parse(body);
-    String videoUrl =
-        document.querySelector('.player > div').attributes['data-vid'];
+    Element element = document.querySelector('.player > div');
+    String videoUrl = url.replaceAll(NetUtils.baseUrl, '');
+    if (element != null && element.attributes.containsKey('data-vid'))
+      videoUrl = element.attributes['data-vid'];
 //    if (videoUrl == null || videoUrl.endsWith('mp4') || videoUrl.endsWith('m3u8'))
     return videoUrl.replaceAll('\$', '.');
 //    else{
@@ -244,5 +249,13 @@ class NetUtils {
 //      element = element.substring(element.indexOf('url:')+5, element.indexOf('m3u8') + 4);
 //      return element;
 //    }
+  }
+
+  static Future<List<TvInfo>> getSearchResult(String url) async {
+    String body = await getBody(url);
+    if (body == null) return null;
+    Document document = parse(body);
+    Element element = document.querySelectorAll(".list")[1];
+    return getListItem(element);
   }
 }

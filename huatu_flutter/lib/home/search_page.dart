@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-
-typedef void OnSubmit(String value);
+import 'package:huatu_flutter/home/detail_page.dart';
+import 'package:huatu_flutter/model/home_model.dart';
+import 'package:huatu_flutter/utils/net_utils.dart';
+import 'package:huatu_flutter/home/webview.dart';
 
 class SearchPage extends StatefulWidget {
   final String placeholder;
-  final OnSubmit onSubmit;
+  final String path;
 
-  SearchPage({this.placeholder, this.onSubmit});
+  SearchPage({this.placeholder, this.path});
 
   @override
   State<StatefulWidget> createState() {
@@ -18,6 +20,15 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   TextEditingController _controller = new TextEditingController();
   bool hasValue = false;
+  List<TvInfo> results = null;
+
+  fetchSearch(String url) {
+    NetUtils.getSearchResult(url).then((val) {
+      setState(() {
+        results = val;
+      });
+    });
+  }
 
   creatSearchView() {
     return Container(
@@ -53,9 +64,6 @@ class _SearchPageState extends State<SearchPage> {
                 prefixIcon: Icon(Icons.search),
                 filled: true,
               ),
-              onChanged: (val) {
-                hasValue = val != null && val.isNotEmpty;
-              },
               controller: _controller,
             ),
           ),
@@ -65,7 +73,44 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   createBody() {
-    return Text('ss');
+    return hasValue
+        ? (results == null || results.isEmpty)
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : ListView.builder(
+                itemCount: results.length,
+                itemBuilder: (context, index) {
+                  TvInfo info = results[index];
+                  return ListTile(
+                    title: Text(info.title),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+//                                  Widget_WebView_Page()
+                                  ChewieDemo(
+                                    title: info.title,
+                                    url: info.path,
+                                  )
+                          ));
+                    },
+                    contentPadding: EdgeInsets.all(5),
+                  );
+                })
+        : Center(
+            child: _controller.text != null && _controller.text.isNotEmpty
+                ? Text('抱歉，未找到相关信息')
+                : Text('输入关键字试试搜索'),
+          );
+  }
+
+  @override
+  void dispose() {
+    _controller.clear();
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -74,13 +119,10 @@ class _SearchPageState extends State<SearchPage> {
       appBar: AppBar(
         leading: IconButton(
             icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: (){
+            onPressed: () {
               Navigator.pop(context);
             }),
         backgroundColor: Colors.white,
-        
-        
-        
         title: creatSearchView(),
         actions: <Widget>[
           IconButton(
@@ -88,7 +130,17 @@ class _SearchPageState extends State<SearchPage> {
                 Icons.send,
                 color: Colors.red,
               ),
-              onPressed: () {}),
+              onPressed: () {
+                String val = widget.placeholder;
+                if (_controller.text != null && _controller.text.isNotEmpty) {
+                  val = _controller.text;
+                }
+                setState(() {
+                  hasValue = true;
+                });
+                print('val...' + val);
+                fetchSearch(NetUtils.baseUrl + widget.path + val);
+              }),
         ],
       ),
       body: createBody(),
