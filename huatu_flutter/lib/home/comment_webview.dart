@@ -21,9 +21,6 @@ class _CommonWebViewPageState extends State<CommonWebView> {
   Widget build(BuildContext context) {
     return new WebviewScaffold(
       url: widget.url,
-      appBar: new AppBar(
-        title: new Text(widget.title),
-      ),
       withZoom: false,
       withLocalStorage: true,
     );

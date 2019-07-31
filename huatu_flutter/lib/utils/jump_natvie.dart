@@ -21,25 +21,25 @@ import 'package:flutter/services.dart';
     return result;
   }
 
-  static const counterPlugin = const EventChannel('com.huatu.counter/plugin');
-
-  StreamSubscription _subscription = null;
-  void initListener(){
-    if(_subscription == null){
-      _subscription =  counterPlugin.receiveBroadcastStream().listen(onEvent,onError: _onError);
-    }
-  }
-
-  void cancle(){
-    if (_subscription != null)
-      _subscription.cancel();
-  }
-
-   void onEvent(Object event){
-    
-  }
-
-  void _onError(Object error) {
-      print(error);
-  }
+//  static const counterPlugin = const EventChannel('com.huatu.counter/plugin');
+//
+//  StreamSubscription _subscription = null;
+//  void initListener(){
+//    if(_subscription == null){
+//      _subscription =  counterPlugin.receiveBroadcastStream().listen(onEvent,onError: _onError);
+//    }
+//  }
+//
+//  void cancle(){
+//    if (_subscription != null)
+//      _subscription.cancel();
+//  }
+//
+//   void onEvent(Object event){
+//
+//  }
+//
+//  void _onError(Object error) {
+//      print(error);
+//  }
 }

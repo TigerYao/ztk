@@ -201,30 +201,40 @@ class _HostPageState extends State<HostPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: tvInfoList.map((f) {
-            return Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                      width: MediaQuery.of(context).size.width - 100,
-                      padding: EdgeInsets.only(right: 50, left: 10),
-                      child: Text(
-                        f.title,
-                        style: TextStyle(),
-                        softWrap: true,
+            return InkWell(
+              onTap: (){
+                Navigator.push(
+                  context,
+                  new MaterialPageRoute(
+                      builder: (context) =>
+                      new ChewieDemo(title: f.title, url: f.path)),
+                );
+              },
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(
+                        width: MediaQuery.of(context).size.width - 100,
+                        padding: EdgeInsets.only(right: 50, left: 10),
+                        child: Text(
+                          f.title,
+                          style: TextStyle(),
+                          softWrap: true,
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Text(f.number),
-                    ),
-                  ],
-                ),
-                Divider(
-                  height: 2,
-                )
-              ],
+                      Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Text(f.number),
+                      ),
+                    ],
+                  ),
+                  Divider(
+                    height: 2,
+                  )
+                ],
+              ),
             );
           }).toList(),
         ));
