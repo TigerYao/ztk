@@ -6,6 +6,10 @@ import 'detail_page.dart';
 import 'search_page.dart';
 
 class HostPage extends StatefulWidget {
+  int type;
+
+  HostPage(this.type);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -16,6 +20,8 @@ class HostPage extends StatefulWidget {
 class _HostPageState extends State<HostPage> {
 //  RecommendInfo mRecommendInfo;
 //  TopInfoModel mTopModel;
+  String _baseUrl;
+  String _searchPath;
   HomeModel mHomeModel;
   String _currentValue = '周一';
   int _currentHeadIndex = 0;
@@ -27,19 +33,44 @@ class _HostPageState extends State<HostPage> {
   @override
   void initState() {
     super.initState();
-    NetUtils.requestData(NetUtils.baseUrl).then((value) => setState(() {
-          if (_mCataList == null) _mCataList = Map();
-          if (_mCatogryTypeList == null) _mCatogryTypeList = Map();
-          mHomeModel = value;
-          mHomeModel.headerInfos.insert(0, TvInfo(path: '/', title: '推荐'));
-          mHomeModel.headerInfos.insert(1, TvInfo(path: '//', title: '最新'));
-          _currentTypes = mHomeModel.infos;
-          _currentCatogrList = mHomeModel.catorgreList;
-          _mCataList.putIfAbsent(NetUtils.baseUrl, () {
-            return _currentCatogrList;
-          });
-          _mCatogryTypeList.putIfAbsent(NetUtils.baseUrl, () => _currentTypes);
-        }));
+    switch (widget.type) {
+      case 1:
+        _baseUrl = NetUtils.meiju_base;
+        _searchPath = '/search/index.asp';
+        NetUtils.requestDataMJ(NetUtils.meiju_base)
+            .then((value) => setState(() {
+                  if (_mCataList == null) _mCataList = Map();
+                  if (_mCatogryTypeList == null) _mCatogryTypeList = Map();
+                  mHomeModel = value;
+                  _currentTypes = mHomeModel.infos;
+                  _currentCatogrList = mHomeModel.catorgreList;
+                  if (_currentCatogrList != null)
+                    _mCataList.putIfAbsent(_baseUrl, () {
+                      return _currentCatogrList;
+                    });
+                  if (_currentTypes != null)
+                    _mCatogryTypeList.putIfAbsent(
+                        _baseUrl, () => _currentTypes);
+                }));
+        break;
+      case 0:
+        _baseUrl = NetUtils.baseUrl;
+        _searchPath = '/search.asp';
+        NetUtils.requestData(_baseUrl).then((value) => setState(() {
+              if (_mCataList == null) _mCataList = Map();
+              if (_mCatogryTypeList == null) _mCatogryTypeList = Map();
+              mHomeModel = value;
+              mHomeModel.headerInfos.insert(0, TvInfo(path: '/', title: '推荐'));
+              mHomeModel.headerInfos.insert(1, TvInfo(path: '//', title: '最新'));
+              _currentTypes = mHomeModel.infos;
+              _currentCatogrList = mHomeModel.catorgreList;
+              _mCataList.putIfAbsent(_baseUrl, () {
+                return _currentCatogrList;
+              });
+              _mCatogryTypeList.putIfAbsent(_baseUrl, () => _currentTypes);
+            }));
+        break;
+    }
   }
 
   fetchDatas(String url) {
@@ -121,7 +152,7 @@ class _HostPageState extends State<HostPage> {
             onTap: () {
               if (_currentHeadIndex == index) return;
               _currentHeadIndex = index;
-              String url = NetUtils.baseUrl;
+              String url = _baseUrl;
               _currentCatogrList = Map();
               _currentTypes = List();
               if (index == 0)
@@ -196,48 +227,51 @@ class _HostPageState extends State<HostPage> {
   }
 
   weekItemView(List<TvInfo> tvInfoList) {
-    return Container(
-        alignment: Alignment.centerLeft,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: tvInfoList.map((f) {
-            return InkWell(
-              onTap: (){
-                Navigator.push(
-                  context,
-                  new MaterialPageRoute(
-                      builder: (context) =>
-                      new ChewieDemo(title: f.title, url: f.path)),
-                );
-              },
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Container(
-                        width: MediaQuery.of(context).size.width - 100,
-                        padding: EdgeInsets.only(right: 50, left: 10),
-                        child: Text(
-                          f.title,
-                          style: TextStyle(),
-                          softWrap: true,
+    if (tvInfoList == null || tvInfoList.isNotEmpty)
+      return Center();
+    else
+      return Container(
+          alignment: Alignment.centerLeft,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: tvInfoList.map((f) {
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    new MaterialPageRoute(
+                        builder: (context) =>
+                            new ChewieDemo(title: f.title, url: f.path)),
+                  );
+                },
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width - 100,
+                          padding: EdgeInsets.only(right: 50, left: 10),
+                          child: Text(
+                            f.title,
+                            style: TextStyle(),
+                            softWrap: true,
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Text(f.number),
-                      ),
-                    ],
-                  ),
-                  Divider(
-                    height: 2,
-                  )
-                ],
-              ),
-            );
-          }).toList(),
-        ));
+                        Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Text(f.number),
+                        ),
+                      ],
+                    ),
+                    Divider(
+                      height: 2,
+                    )
+                  ],
+                ),
+              );
+            }).toList(),
+          ));
   }
 
   tvContentView() {
@@ -365,7 +399,8 @@ class _HostPageState extends State<HostPage> {
           context,
           new MaterialPageRoute(
               builder: (context) => SearchPage(
-                    placeholder: "进击的巨人全季",
+                    placeholder: "一拳超人",
+                    path: _baseUrl + _searchPath,
                   )),
         );
       },

@@ -114,56 +114,55 @@ class _ChewieDemoState extends State<ChewieDemo> {
       height: MediaQuery.of(context).size.width * 9 / 16,
       width: MediaQuery.of(context).size.width,
       child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                Image.network(
-                  _detailModel.currentInfo.picUrl,
-                  fit: BoxFit.fill,
-                  height: MediaQuery.of(context).size.width * 9 / 16,
-                  width: MediaQuery.of(context).size.width,
-                ),
-                BackdropFilter(
-                  filter: new ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                  child: new Container(
-                    color: Colors.white.withOpacity(0.1),
-                    height: MediaQuery.of(context).size.width * 9 / 16,
-                    width: MediaQuery.of(context).size.width,
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    RaisedButton(
-                      onPressed: () {
-                        _jumpNativie
-                            .jumpToNativeWithValue(
-                                "webview_video",
-                                "getVideo",
-                                NetUtils.baseUrl +
-                                    _detailModel.currentInfo.path)
-                            .then((value) {
-                          print("videoUrl == " + value);
-                          setState(() {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => VideoScaffold()));
-                          });
-                        });
-                      },
-                      child: Text('立即播放'),
-                      color: Colors.lightGreenAccent,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5)),
-                    ),
-                    Text(
-                      _detailModel.currentInfo
-                          .tags[_detailModel.currentInfo.tags.length - 1],
-                      style: TextStyle(
-                          backgroundColor: Color(0x55000000),
-                          color: Colors.white),
-                    )
-                  ],
-                ),
-              ],
+        alignment: Alignment.center,
+        children: <Widget>[
+          Image.network(
+            _detailModel.currentInfo.picUrl,
+            fit: BoxFit.fill,
+            height: MediaQuery.of(context).size.width * 9 / 16,
+            width: MediaQuery.of(context).size.width,
+          ),
+          BackdropFilter(
+            filter: new ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+            child: new Container(
+              color: Colors.white.withOpacity(0.1),
+              height: MediaQuery.of(context).size.width * 9 / 16,
+              width: MediaQuery.of(context).size.width,
             ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              RaisedButton(
+                onPressed: () {
+                  _jumpNativie
+                      .jumpToNativeWithValue("webview_video", "getVideo",
+                          NetUtils.baseUrl + _detailModel.currentInfo.path)
+                      .then((value) {
+                    print("videoUrl == " + value);
+                    setState(() {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => VideoScaffold()));
+                    });
+                  });
+                },
+                child: Text('立即播放'),
+                color: Colors.lightGreenAccent,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+              ),
+              Text(
+                _detailModel
+                    .currentInfo.tags[_detailModel.currentInfo.tags.length - 1],
+                style: TextStyle(
+                    backgroundColor: Color(0x55000000), color: Colors.white),
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -188,6 +187,12 @@ class _ChewieDemoState extends State<ChewieDemo> {
       theme: ThemeData.light().copyWith(),
       home: Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
             title: Text(widget.title),
           ),
           body: _detailModel == null
@@ -204,4 +209,3 @@ class _ChewieDemoState extends State<ChewieDemo> {
     );
   }
 }
-

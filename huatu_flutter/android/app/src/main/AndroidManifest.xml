@@ -8,7 +8,7 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="huatu_flutter"
+        android:label="超级影漫"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity

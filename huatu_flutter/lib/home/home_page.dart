@@ -12,8 +12,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   static List tabData = [
-    {'text': '主页', 'icon': Icon(Icons.music_video)},
-    {'text': '发现', 'icon': Icon(Icons.queue_music)},
+    {'text': '动漫', 'icon': Icon(Icons.music_video)},
+    {'text': '剧集', 'icon': Icon(Icons.queue_music)},
     {'text': '收藏', 'icon': Icon(Icons.favorite)},
     {'text': '我的', 'icon': Icon(Icons.person)},
   ];
@@ -30,8 +30,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     _listPages
-      ..add(HostPage())
-      ..add(Text('d'))
+      ..add(HostPage(0))
+      ..add(HostPage(1))
       ..add(Text('ds'))
       ..add(Text('dd'));
   }
@@ -39,10 +39,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//      appBar: AppBar(
-//        title: Text('天籁之音'),
-//        centerTitle: true,
-//      ),
       body: IndexedStack(
         index: _currentIndex,
         children: _listPages,
