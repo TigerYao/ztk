@@ -96,8 +96,8 @@ class NetUtils {
         '#guide > div > div > a');
     List<Element> headerNavls = document.querySelectorAll('.guide > div > nav > a');
     List<Element> navEles = document.getElementsByClassName('list_4');
-//    List<Element> contentNav = document.querySelectorAll('#box_4 > div > ul > li');
-//    print("headerNav.... " + contentNav.toString());
+    List<Element> contentNav = document.getElementsByClassName('box_3');
+    print("contentNav.... " + contentNav.toString());
     for (Element el in headerNavls) {
       String title = el
           .querySelector('p')
@@ -138,7 +138,24 @@ class NetUtils {
         return infos;
       });
     }
-    print("tabListInfos.... " +  homeModel.tabListInfos.toString());
+    
+    for(Element el in contentNav){
+      Element titlInfo = el.querySelector("div");
+      String cateTitle = titlInfo.querySelector('h4').text;
+      String path = titlInfo.querySelector("a").attributes['href'];
+      homeModel.infos.add(TvInfo(path: path, title: cateTitle));
+      List<Element> contentEle = el.querySelectorAll('li');
+      homeModel.catorgreList.putIfAbsent(cateTitle, (){
+        return List();
+      });
+      for(Element element in contentEle){
+        Element aTag = element.querySelector('a');
+        String title = aTag.attributes['title'];
+        String path = aTag.attributes['href'];
+        String picPath = aTag.querySelector('span > img').attributes['src'];
+        String num = aTag.querySelector('i').text;
+      }
+    }
     return homeModel;
   }
 
