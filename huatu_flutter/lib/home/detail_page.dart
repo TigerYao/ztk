@@ -95,7 +95,9 @@ class _ChewieDemoState extends State<ChewieDemo> {
       itemBuilder: (context, index) {
         TvInfo f = _detailModel.playLists[index];
         return RaisedButton(
-          onPressed: () {},
+          onPressed: () {
+            _jumpVideo(NetUtils.baseUrl + f.path);
+          },
           child: Text(
             f.number,
             style: TextStyle(fontSize: 8),
@@ -135,18 +137,7 @@ class _ChewieDemoState extends State<ChewieDemo> {
             children: <Widget>[
               RaisedButton(
                 onPressed: () {
-                  _jumpNativie
-                      .jumpToNativeWithValue("webview_video", "getVideo",
-                          NetUtils.baseUrl + _detailModel.currentInfo.path)
-                      .then((value) {
-                    print("videoUrl == " + value);
-                    setState(() {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => VideoScaffold()));
-                    });
-                  });
+                  _jumpVideo(NetUtils.baseUrl + _detailModel.currentInfo.path);
                 },
                 child: Text('立即播放'),
                 color: Colors.lightGreenAccent,
@@ -164,6 +155,20 @@ class _ChewieDemoState extends State<ChewieDemo> {
         ],
       ),
     );
+  }
+
+  _jumpVideo(String url){
+    _jumpNativie
+        .jumpToNativeWithValue("webview_video", "getVideo",url)
+        .then((value) {
+      print("videoUrl == " + value);
+      setState(() {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => VideoScaffold()));
+      });
+    });
   }
 
   createBody() {

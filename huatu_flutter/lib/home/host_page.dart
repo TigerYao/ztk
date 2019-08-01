@@ -227,7 +227,8 @@ class _HostPageState extends State<HostPage> {
   }
 
   weekItemView(List<TvInfo> tvInfoList) {
-    if (tvInfoList == null || tvInfoList.isNotEmpty)
+    print("...week..." + tvInfoList.toString());
+    if (tvInfoList == null || tvInfoList.isEmpty)
       return Center();
     else
       return Container(

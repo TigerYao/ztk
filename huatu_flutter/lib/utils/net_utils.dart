@@ -154,6 +154,7 @@ class NetUtils {
         String path = aTag.attributes['href'];
         String picPath = aTag.querySelector('span > img').attributes['src'];
         String num = aTag.querySelector('i').text;
+        homeModel.catorgreList[cateTitle].add(TvInfo(path: path, title: title, picUrl: picPath, number: num));
       }
     }
     return homeModel;
@@ -215,11 +216,11 @@ class NetUtils {
             .text;
         String path = info.attributes['href'];
         String title = info.text;
-//        print(info.toString() + "==tListEles ==" + path + "..." + tvNum);
         tListChildren.add(TvInfo(path: path, number: tvNum, title: title));
       }
       mTabLists.putIfAbsent(weekName, () => tListChildren);
     }
+//    print("==tListEles。。 ==" + mTabLists.toString());
     return mTabLists;
   }
 
@@ -296,6 +297,20 @@ class NetUtils {
       infoList.add(TvInfo(path: path, title: title));
     }
     return infoList;
+  }
+  
+  static Future<TvDetailModel> getIntroMj(String url) async{
+    String body = await getBody(url);
+    if (body == null) return null;
+    TvDetailModel detailModel = TvDetailModel();
+    Document document = parse(body);
+    Element headerTitle = document.getElementById('piccon');
+    String title = headerTitle.querySelector('h1').text;
+    String picPath = headerTitle.querySelector('#pic > img').attributes['src'];
+    List<Element> tagEls = headerTitle.getElementsByClassName('sDes');
+    for(Element tagelt in tagEls){
+
+    }
   }
 
   static Future<TvDetailModel> getIntro(String url) async {
@@ -381,5 +396,15 @@ class NetUtils {
           TvInfo(title: title, number: tvNum, path: path, picUrl: imgPath));
     }
     return infos;
+  }
+
+  static Future<String> getVideoUrl(String url)async{
+    Dio _dio = DioFactory.getInstance().getDio();
+    Response infos = await _dio.get(url);
+    print("videoURl == " +infos.data.toString());
+    Map<String, dynamic> datas = infos.data;
+    List<dynamic> videData = datas['stream'];
+    String videoM3 = videData[0]['m3u8_url'];
+    return videoM3;
   }
 }

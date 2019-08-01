@@ -39,7 +39,7 @@ public class MainActivity extends FlutterActivity {
                 @Override
                 public void onLoadResource(WebView view, String url) {
                     super.onLoadResource(view, url);
-                    if (url.contains("vid=")) {
+                    if (url.contains("vid=") && (url.contains("mp4") || url.contains("m3u8") || url.contains("get.json"))) {
                         FlutterPluginCounter.onSendValue(url);
                         Log.d("vid==", url);
                     }

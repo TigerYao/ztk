@@ -4,6 +4,7 @@ import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:huatu_flutter/utils/net_utils.dart';
 
 class VideoScaffold extends StatefulWidget {
   @override
@@ -30,9 +31,17 @@ class _VideoScaffoldState extends State<VideoScaffold> {
   }
 
   void onEvent(Object event) {
-    setState(() {
-      url = event;
-    });
+    url = event;
+    if (url.contains("get.json")) {
+      NetUtils.getVideoUrl(event).then((val) {
+        setState(() {
+          url = val;
+          print("url....jjj  "+ url);
+        });
+      });
+    } else {
+      setState(() {});
+    }
   }
 
   void _onError(Object error) {
