@@ -9,10 +9,11 @@ import 'package:huatu_flutter/utils/jump_natvie.dart';
 import 'video_view.dart';
 
 class ChewieDemo extends StatefulWidget {
-  ChewieDemo({this.title = 'Chewie Demo', this.url});
+  ChewieDemo({this.title = 'Chewie Demo', this.url, this.baseUrl});
 
   final String title;
   String url;
+  String baseUrl;
 
   @override
   State<StatefulWidget> createState() {
@@ -32,7 +33,7 @@ class _ChewieDemoState extends State<ChewieDemo> {
     _jumpNativie = JumpNativie();
     String url = (widget.url.contains("http"))
         ? widget.url
-        : NetUtils.baseUrl + widget.url;
+        : widget.baseUrl + widget.url;
     NetUtils.getIntro(url).then((tvDetailModel) {
       setState(() {
         _detailModel = tvDetailModel;
@@ -46,36 +47,59 @@ class _ChewieDemoState extends State<ChewieDemo> {
   }
 
   createTagView() {
-    return ListView.builder(
-      itemCount: _detailModel.currentInfo.tags.length,
-      itemBuilder: (context, index) {
-        String data = _detailModel.currentInfo.tags[index];
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            ClipOval(
-              child: Container(
-                margin: EdgeInsets.all(5),
-                padding: EdgeInsets.all(5),
-                alignment: Alignment.center,
-                width: 5,
-                height: 5,
-                color: Colors.black,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(5),
-              child: Text(
-                data,
-                style: TextStyle(color: Colors.black, fontSize: 12),
-              ),
-            )
-          ],
-        );
+    List<Widget> childrens = _detailModel.currentInfo.tags.map((info) {
+      return Container(
+        width: 200,
+        padding: EdgeInsets.only(right: 5),
+        child: Text(
+          info,
+          style: TextStyle(fontSize: 12, color: Colors.white),
+          textAlign: TextAlign.left,
+        ),
+      );
+    }).toList();
+    Widget btn = RaisedButton(
+      onPressed: () {
+        _jumpVideo(widget.baseUrl + _detailModel.currentInfo.path);
       },
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      child: Text('立即播放'),
+      color: Colors.lightGreenAccent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
     );
+    return Column(
+      children: <Widget>[Column(children: childrens), btn],
+    );
+//    return ListView.builder(
+//      itemCount: _detailModel.currentInfo.tags.length,
+//      itemBuilder: (context, index) {
+//        String data = _detailModel.currentInfo.tags[index];
+//        return
+//          Row(
+//            mainAxisAlignment: MainAxisAlignment.start,
+//            children: <Widget>[
+//              ClipOval(
+//                child: Container(
+////                margin: EdgeInsets.all(5),
+////                padding: EdgeInsets.all(5),
+//                  alignment: Alignment.center,
+//                  width: 5,
+//                  height: 5,
+//                  color: Colors.black,
+//                ),
+//              ),
+//            Padding(
+////              padding: EdgeInsets.all(5),
+//              child: Text(
+//                data,
+//                style: TextStyle(color: Colors.white, fontSize: 12),
+//              ),
+//            )
+//          ],
+//        );
+//      },
+//      shrinkWrap: true,
+//      physics: NeverScrollableScrollPhysics(),
+//    );
   }
 
   createTvNum() {
@@ -96,7 +120,7 @@ class _ChewieDemoState extends State<ChewieDemo> {
         TvInfo f = _detailModel.playLists[index];
         return RaisedButton(
           onPressed: () {
-            _jumpVideo(NetUtils.baseUrl + f.path);
+            _jumpVideo(widget.baseUrl + f.path);
           },
           child: Text(
             f.number,
@@ -112,11 +136,11 @@ class _ChewieDemoState extends State<ChewieDemo> {
 
   createBodyTop() {
     return Container(
-      alignment: Alignment.center,
-      height: MediaQuery.of(context).size.width * 9 / 16,
+      alignment: Alignment.centerLeft,
+//      height: MediaQuery.of(context).size.width * 9 / 16,
       width: MediaQuery.of(context).size.width,
       child: Stack(
-        alignment: Alignment.center,
+        alignment: Alignment.centerLeft,
         children: <Widget>[
           Image.network(
             _detailModel.currentInfo.picUrl,
@@ -132,41 +156,77 @@ class _ChewieDemoState extends State<ChewieDemo> {
               width: MediaQuery.of(context).size.width,
             ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              RaisedButton(
-                onPressed: () {
-                  _jumpVideo(NetUtils.baseUrl + _detailModel.currentInfo.path);
-                },
-                child: Text('立即播放'),
-                color: Colors.lightGreenAccent,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5)),
-              ),
-              Text(
-                _detailModel
-                    .currentInfo.tags[_detailModel.currentInfo.tags.length - 1],
-                style: TextStyle(
-                    backgroundColor: Color(0x55000000), color: Colors.white),
-              )
-            ],
+          Positioned(
+            left: 10,
+            width: 120,
+            child: Image.network(
+              _detailModel.currentInfo.picUrl,
+              fit: BoxFit.cover,
+//              height: MediaQuery.of(context).size.width * 9 / 16,
+//              width: MediaQuery.of(context).size.width,
+            ),
           ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: createTagView(),
+          )
+//          Container(
+//            child: Row(
+//              children: <Widget>[
+//                Image.network(
+//                  _detailModel.currentInfo.picUrl,
+//                  fit: BoxFit.fill,
+//                  height: MediaQuery.of(context).size.width * 9 / 16,
+//                  width: MediaQuery.of(context).size.width,
+//                ),
+//                createTagView()
+//              ],
+//            ),
+//          )
+//          Column(
+//            mainAxisAlignment: MainAxisAlignment.center,
+//            children: <Widget>[
+//              RaisedButton(
+//                onPressed: () {
+//                  _jumpVideo(widget.baseUrl + _detailModel.currentInfo.path);
+//                },
+//                child: Text('立即播放'),
+//                color: Colors.lightGreenAccent,
+//                shape: RoundedRectangleBorder(
+//                    borderRadius: BorderRadius.circular(5)),
+//              ),
+//              Text(
+//                _detailModel
+//                    .currentInfo.tags[_detailModel.currentInfo.tags.length - 1],
+//                style: TextStyle(
+//                    backgroundColor: Color(0x55000000), color: Colors.white),
+//              )
+//            ],
+//          ),
+//          Row(
+//            children: <Widget>[
+//              Image.network(
+//                _detailModel.currentInfo.picUrl,
+//                fit: BoxFit.fill,
+//                height: MediaQuery.of(context).size.width * 9 / 16,
+//                width: MediaQuery.of(context).size.width,
+//              ),
+//              createTagView()
+//            ],
+//          ),
         ],
       ),
     );
   }
 
-  _jumpVideo(String url){
+  _jumpVideo(String url) {
     _jumpNativie
-        .jumpToNativeWithValue("webview_video", "getVideo",url)
+        .jumpToNativeWithValue("webview_video", "getVideo", url)
         .then((value) {
       print("videoUrl == " + value);
       setState(() {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => VideoScaffold()));
+            context, MaterialPageRoute(builder: (context) => VideoScaffold()));
       });
     });
   }
@@ -174,14 +234,16 @@ class _ChewieDemoState extends State<ChewieDemo> {
   createBody() {
     List<Widget> children = List();
     children.add(createBodyTop());
-    children.add(createTvNum());
-    children.add(createTagView());
-    children.add(ListTile(
-      title: Text(
-        _detailModel.currentInfo.tvDescription,
-        style: TextStyle(fontSize: 16, color: Colors.redAccent),
-      ),
-    ));
+    if (_detailModel.playLists != null && _detailModel.playLists.isNotEmpty)
+      children.add(createTvNum());
+    if (_detailModel.currentInfo.tvDescription != null &&
+        _detailModel.currentInfo.tvDescription.isNotEmpty)
+      children.add(ListTile(
+        title: Text(
+          _detailModel.currentInfo.tvDescription,
+          style: TextStyle(fontSize: 16, color: Colors.redAccent),
+        ),
+      ));
     return children;
   }
 

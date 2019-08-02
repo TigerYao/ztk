@@ -13,6 +13,7 @@ class VideoScaffold extends StatefulWidget {
 
 class _VideoScaffoldState extends State<VideoScaffold> {
   String url;
+  bool isSucces;
 
   static const counterPlugin = const EventChannel('com.huatu.counter/plugin');
 
@@ -32,6 +33,7 @@ class _VideoScaffoldState extends State<VideoScaffold> {
 
   void onEvent(Object event) {
     url = event;
+    isSucces = true;
     if (url.contains("get.json")) {
       NetUtils.getVideoUrl(event).then((val) {
         setState(() {
@@ -45,7 +47,9 @@ class _VideoScaffoldState extends State<VideoScaffold> {
   }
 
   void _onError(Object error) {
-    print(error);
+    setState(() {
+      isSucces = false;
+    });
   }
 
   @override
@@ -74,7 +78,7 @@ class _VideoScaffoldState extends State<VideoScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return (url == null || url.isEmpty)
+    return (url == null || url.isEmpty || !isSucces)
         ? Center(
             child: CircularProgressIndicator(),
           )

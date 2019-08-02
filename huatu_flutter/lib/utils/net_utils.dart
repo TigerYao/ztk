@@ -92,19 +92,17 @@ class NetUtils {
     if (htmBody == null) return null;
     Document document = parse(htmBody);
     homeModel.headerInfos = List();
-    List<Element> headerEle = document.querySelectorAll(
-        '#guide > div > div > a');
-    List<Element> headerNavls = document.querySelectorAll('.guide > div > nav > a');
+    List<Element> headerEle =
+        document.querySelectorAll('#guide > div > div > a');
+    List<Element> headerNavls =
+        document.querySelectorAll('.guide > div > nav > a');
     List<Element> navEles = document.getElementsByClassName('list_4');
     List<Element> contentNav = document.getElementsByClassName('box_3');
     print("contentNav.... " + contentNav.toString());
     for (Element el in headerNavls) {
-      String title = el
-          .querySelector('p')
-          .text;
+      String title = el.querySelector('p').text;
       String path = el.attributes['href'];
       homeModel.headerInfos.add(TvInfo(title: title, path: path));
-
     }
 
     for (Element el in headerEle) {
@@ -112,24 +110,20 @@ class NetUtils {
       String path = el.attributes['href'];
       homeModel.headerInfos.add(TvInfo(title: title, path: path));
     }
-    for (int i = 0;i< navEles.length ;i++) {
+    for (int i = 0; i < navEles.length; i++) {
       Element el = navEles[i];
       List<Element> navEleLis = el.querySelectorAll('li');
       List<TvInfo> infos = List();
       for (Element navLi in navEleLis) {
-        String path = navLi
-            .querySelector('a')
-            .attributes['href'];
-        String title = navLi
-            .querySelector('h5')
-            .text;
+        String path = navLi.querySelector('a').attributes['href'];
+        String title = navLi.querySelector('h5').text;
         String picPath = '';
-        if (navLi.querySelector('img') != null) picPath = navLi
-            .querySelector('img')
-            .attributes['src'];
+        if (navLi.querySelector('img') != null)
+          picPath = navLi.querySelector('img').attributes['src'];
         List<Element> pTags = navLi.querySelectorAll(" p > font");
         String num = '';
-        if(pTags != null && pTags.isNotEmpty) num = pTags[pTags.length - 1].text;
+        if (pTags != null && pTags.isNotEmpty)
+          num = pTags[pTags.length - 1].text;
         infos.add(
             TvInfo(path: path, title: title, picUrl: picPath, number: num));
       }
@@ -138,25 +132,27 @@ class NetUtils {
         return infos;
       });
     }
-    
-    for(Element el in contentNav){
+
+    for (Element el in contentNav) {
       Element titlInfo = el.querySelector("div");
       String cateTitle = titlInfo.querySelector('h4').text;
       String path = titlInfo.querySelector("a").attributes['href'];
       homeModel.infos.add(TvInfo(path: path, title: cateTitle));
       List<Element> contentEle = el.querySelectorAll('li');
-      homeModel.catorgreList.putIfAbsent(cateTitle, (){
+      homeModel.catorgreList.putIfAbsent(cateTitle, () {
         return List();
       });
-      for(Element element in contentEle){
+      for (Element element in contentEle) {
         Element aTag = element.querySelector('a');
         String title = aTag.attributes['title'];
         String path = aTag.attributes['href'];
         String picPath = aTag.querySelector('span > img').attributes['src'];
         String num = aTag.querySelector('i').text;
-        homeModel.catorgreList[cateTitle].add(TvInfo(path: path, title: title, picUrl: picPath, number: num));
+        homeModel.catorgreList[cateTitle].add(
+            TvInfo(path: path, title: title, picUrl: picPath, number: num));
       }
     }
+//    getIntroMj('https://m.meijutt.com/content/meiju24211.html');
     return homeModel;
   }
 
@@ -171,6 +167,7 @@ class NetUtils {
             '.am-offcanvas-bar > ul > li > a'); //('.sort > a');
 //        print("...sortsInfo...." + sortsInfo.toString());
         for (var el in sortsInfo) {
+          if (el.text.contains("美国")) continue;
           homeModel.headerInfos
               .add(TvInfo(path: el.attributes['href'], title: el.text));
         }
@@ -178,7 +175,7 @@ class NetUtils {
 //      print("...headerInfos...." + homeModel.headerInfos.toString());
       if (homeModel.sliderInfos.isEmpty) {
         List<Element> sliderElem =
-        document.querySelectorAll('.am-slides > li'); //('.am-list > li');
+            document.querySelectorAll('.am-slides > li'); //('.am-list > li');
         for (var sl in sliderElem) {
           Element sliderNode = sl.querySelector('a');
           Element picNode = sl.querySelector('img');
@@ -203,7 +200,7 @@ class NetUtils {
   static Map<String, List<TvInfo>> getTabList(Document document) {
     Map<String, List<TvInfo>> mTabLists = Map();
     List<Element> tListEles =
-    document.querySelectorAll('.am-tabs-bd > div > div > ul');
+        document.querySelectorAll('.am-tabs-bd > div > div > ul');
 //    print("==tListEles ==" +tListEles.toString());
     for (int i = 0; i < 7 && i < tListEles.length; i++) {
       String weekName = weekNames[i];
@@ -211,9 +208,7 @@ class NetUtils {
       List<TvInfo> tListChildren = List();
       for (var tNode in childNodes) {
         Element info = tNode.querySelector('a');
-        String tvNum = tNode
-            .querySelector('span')
-            .text;
+        String tvNum = tNode.querySelector('span').text;
         String path = info.attributes['href'];
         String title = info.text;
         tListChildren.add(TvInfo(path: path, number: tvNum, title: title));
@@ -229,7 +224,7 @@ class NetUtils {
     List<TvInfo> infos = List();
 
     List<Element> listEles =
-    document.getElementsByClassName("am-titlebar-title ");
+        document.getElementsByClassName("am-titlebar-title ");
     List<Element> listElesNav = document
         .querySelectorAll(' div > .am-titlebar-nav > .am-icon-angle-right');
     List<Element> listCategoriesElem = document.querySelectorAll('.am-gallery');
@@ -253,21 +248,13 @@ class NetUtils {
         catorgreList.putIfAbsent(keyInfo.title, () => values);
         List<Element> cateEls = listCategoriesElem[i].querySelectorAll("li");
         for (Element category in cateEls) {
-          String title = category
-              .querySelector('.am-gallery-title')
-              .text;
-          String tvNum = category
-              .querySelector('.am-gallery-desc')
-              .text;
+          String title = category.querySelector('.am-gallery-title').text;
+          String tvNum = category.querySelector('.am-gallery-desc').text;
           String path =
-          category
-              .querySelector('.am-gallery-item > a')
-              .attributes['href'];
-          String imgPathStr = category
-              .querySelector('.lazy')
-              .outerHtml;
+              category.querySelector('.am-gallery-item > a').attributes['href'];
+          String imgPathStr = category.querySelector('.lazy').outerHtml;
           String imgPath = imgPathStr.substring(
-              imgPathStr.indexOf("http"), imgPathStr.indexOf('.jpg')) +
+                  imgPathStr.indexOf("http"), imgPathStr.indexOf('.jpg')) +
               '.jpg';
 //          print("imgPaht...." + imgPath);
           catorgreList[keyInfo.title].add(
@@ -277,7 +264,6 @@ class NetUtils {
     }
     return [infos, catorgreList];
   }
-
 
   static Future<List> fetchDataByCategory(String url) async {
     String body = await getBody(url);
@@ -289,7 +275,7 @@ class NetUtils {
   static List<TvInfo> getPlayList(Document document) {
     List<TvInfo> infoList = List();
     List<Element> playListEle =
-    document.querySelectorAll('#playlists > ul > li');
+        document.querySelectorAll('#playlists > ul > li');
     for (var itemEl in playListEle) {
       Element itemL = itemEl.querySelector('a');
       String path = itemL.attributes['href'];
@@ -298,29 +284,51 @@ class NetUtils {
     }
     return infoList;
   }
-  
-  static Future<TvDetailModel> getIntroMj(String url) async{
+
+  static Future<TvDetailModel> getIntroMj(String url) async {
     String body = await getBody(url);
     if (body == null) return null;
     TvDetailModel detailModel = TvDetailModel();
     Document document = parse(body);
     Element headerTitle = document.getElementById('piccon');
+//    print("...headerTitle.."+ headerTitle.outerHtml );
     String title = headerTitle.querySelector('h1').text;
-    String picPath = headerTitle.querySelector('#pic > img').attributes['src'];
-    List<Element> tagEls = headerTitle.getElementsByClassName('sDes');
-    for(Element tagelt in tagEls){
-
+    String picPath = headerTitle
+        .getElementsByClassName('pic')[0]
+        .querySelector("img")
+        .attributes['src'];
+    List<Element> tagEls = headerTitle.getElementsByClassName('emTit');
+    List<String> tags = List();
+    for (Element tagelt in tagEls) {
+      String tagName = tagelt.text;
+      if (tagName == null || tagName.isEmpty) continue;
+      tags.add(tagName);
     }
+    detailModel.currentInfo = TvInfo(picUrl: picPath, title: title);
+    detailModel.currentInfo.tags = tags;
+    Element playListElem = document.getElementsByClassName('test')[1];
+
+    if (playListElem != null) {
+      detailModel.playLists = List();
+      List<Element> playEls = playListElem.getElementsByTagName('a');
+      for (Element el in playEls) {
+        String title = el.attributes['title'];
+        String path = el.attributes['href'];
+//                      print(title + ".....playList...." + path);
+        detailModel.playLists.add(TvInfo(path: path, number: title));
+      }
+    }
+
+    return detailModel;
   }
 
   static Future<TvDetailModel> getIntro(String url) async {
+    if (url.startsWith(meiju_base)) return await getIntroMj(url);
     String body = await getBody(url);
     if (body == null) return null;
     TvDetailModel detailModel = TvDetailModel();
     Document document = parse(body);
-    String title = document
-        .querySelector('.am-header-title')
-        .text;
+    String title = document.querySelector('.am-header-title').text;
     Element element = document.querySelector('.am-intro-left > img');
     String picPath = element.attributes['src'];
     List<Element> infoElement = document.querySelectorAll('#p-info > p');
@@ -339,9 +347,7 @@ class NetUtils {
 //    print('tags == ' + tags.toString());
     Element elementA = document.querySelector('#p-info > a');
     String currentPath = elementA.attributes['href'];
-    String description = document
-        .querySelector('.txtDesc')
-        .text;
+    String description = document.querySelector('.txtDesc').text;
     detailModel.currentInfo = TvInfo(
         path: currentPath,
         tvDescription: description,
@@ -362,8 +368,8 @@ class NetUtils {
     return detailModel;
   }
 
-  static Future<List<TvInfo>> getSearchResult(String url,
-      String keywrods) async {
+  static Future<List<TvInfo>> getSearchResult(
+      String url, String keywrods) async {
     String postB = UrlEncode().encode(keywrods);
     String body = await postBody(url, postB);
     if (body == null) return null;
@@ -373,23 +379,15 @@ class NetUtils {
 
   static List<TvInfo> getListItem1(Document document) {
     List<TvInfo> infos = List();
-    List<Element> listCategoriesElem = document.querySelectorAll(
-        'li > .am-gallery-item');
+    List<Element> listCategoriesElem =
+        document.querySelectorAll('li > .am-gallery-item');
     for (Element category in listCategoriesElem) {
-      String title = category
-          .querySelector('.am-gallery-title')
-          .text;
-      String tvNum = category
-          .querySelector('.am-gallery-desc')
-          .text;
-      String path = category
-          .querySelector('a')
-          .attributes['href'];
-      String imgPathStr = category
-          .querySelector('.lazy')
-          .outerHtml;
+      String title = category.querySelector('.am-gallery-title').text;
+      String tvNum = category.querySelector('.am-gallery-desc').text;
+      String path = category.querySelector('a').attributes['href'];
+      String imgPathStr = category.querySelector('.lazy').outerHtml;
       String imgPath = imgPathStr.substring(
-          imgPathStr.indexOf("http"), imgPathStr.indexOf('.jpg')) +
+              imgPathStr.indexOf("http"), imgPathStr.indexOf('.jpg')) +
           '.jpg';
 //        print("imgPaht...." + imgPath);
       infos.add(
@@ -398,10 +396,10 @@ class NetUtils {
     return infos;
   }
 
-  static Future<String> getVideoUrl(String url)async{
+  static Future<String> getVideoUrl(String url) async {
     Dio _dio = DioFactory.getInstance().getDio();
     Response infos = await _dio.get(url);
-    print("videoURl == " +infos.data.toString());
+    print("videoURl == " + infos.data.toString());
     Map<String, dynamic> datas = infos.data;
     List<dynamic> videData = datas['stream'];
     String videoM3 = videData[0]['m3u8_url'];

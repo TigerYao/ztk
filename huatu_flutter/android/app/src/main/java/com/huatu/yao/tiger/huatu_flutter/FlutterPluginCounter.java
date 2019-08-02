@@ -45,7 +45,7 @@ public class FlutterPluginCounter implements EventChannel.StreamHandler {
 
     public static void onFail(String obj, String e1, String e2) {
         if (mEventSink != null)
-            mEventSink.error(obj, e1, e2);
+            mEventSink.error(e1, e2, obj);
     }
 
     @Override

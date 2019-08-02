@@ -15,11 +15,13 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
     WebView webView;
+    String videoUrl = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
         registerCustomPlugin(this);
+
         if (webView == null) {
             webView = new WebView(this);
             webView.getSettings().setJavaScriptEnabled(true);
@@ -39,11 +41,24 @@ public class MainActivity extends FlutterActivity {
                 @Override
                 public void onLoadResource(WebView view, String url) {
                     super.onLoadResource(view, url);
-                    if (url.contains("vid=") && (url.contains("mp4") || url.contains("m3u8") || url.contains("get.json"))) {
-                        FlutterPluginCounter.onSendValue(url);
+                    Log.d("Main..", "onLoadResource.url.." + url);
+                    if (url.contains("vid=") && (url.contains("mp4") || url.contains("m3u8"))) {
+                        videoUrl = url;
                         Log.d("vid==", url);
                     }
                 }
+
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    videoUrl = url;
+                    Log.d("Main..", "onPageFinished.url.." + videoUrl);
+                    if (videoUrl != null && !videoUrl.isEmpty())
+                        FlutterPluginCounter.onSendValue(videoUrl);
+                    else
+                        FlutterPluginCounter.onFail(url, "无法播放", "解析不到videourl");
+                }
+
             });
         }
     }

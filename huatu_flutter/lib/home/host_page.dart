@@ -23,7 +23,7 @@ class _HostPageState extends State<HostPage> {
   String _baseUrl;
   String _searchPath;
   HomeModel mHomeModel;
-  String _currentValue = '周一';
+  String _currentValue; //= widget.type == 0 ? NetUtils.weekNames[0]: NetUtils.navNames[0];
   int _currentHeadIndex = 0;
   Map<String, Map<String, List<TvInfo>>> _mCataList;
   Map<String, List<TvInfo>> _mCatogryTypeList;
@@ -33,6 +33,7 @@ class _HostPageState extends State<HostPage> {
   @override
   void initState() {
     super.initState();
+    _currentValue = widget.type == 0 ? NetUtils.weekNames[0]: NetUtils.navNames[0];
     switch (widget.type) {
       case 1:
         _baseUrl = NetUtils.meiju_base;
@@ -131,7 +132,7 @@ class _HostPageState extends State<HostPage> {
             context,
             new MaterialPageRoute(
                 builder: (context) =>
-                    new ChewieDemo(title: f.title, url: f.path)),
+                    new ChewieDemo(title: f.title, url: f.path, baseUrl: _baseUrl)),
           );
         },
         viewportFraction: 0.9,
@@ -227,7 +228,7 @@ class _HostPageState extends State<HostPage> {
   }
 
   weekItemView(List<TvInfo> tvInfoList) {
-    print("...week..." + tvInfoList.toString());
+//    print("...week..." + tvInfoList.toString());
     if (tvInfoList == null || tvInfoList.isEmpty)
       return Center();
     else
@@ -242,7 +243,7 @@ class _HostPageState extends State<HostPage> {
                     context,
                     new MaterialPageRoute(
                         builder: (context) =>
-                            new ChewieDemo(title: f.title, url: f.path)),
+                            new ChewieDemo(title: f.title, url: f.path, baseUrl: _baseUrl,)),
                   );
                 },
                 child: Column(
@@ -275,11 +276,86 @@ class _HostPageState extends State<HostPage> {
           ));
   }
 
+  weekItemGridView(List<TvInfo> tvInfoList) {
+    print("...week..." + tvInfoList.toString());
+    if (tvInfoList == null || tvInfoList.isEmpty)
+      return Center();
+    else
+      return Container(
+          alignment: Alignment.centerLeft,
+          child: GridView.custom(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 2.0,
+                crossAxisSpacing: 2.0,
+                childAspectRatio: 9 / 16),
+            childrenDelegate: SliverChildBuilderDelegate((context, index) {
+              TvInfo f = tvInfoList[index];
+              return InkWell(
+//          padding: EdgeInsets.all(5),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    new MaterialPageRoute(
+                        builder: (context) =>
+                        new ChewieDemo(title: f.title, url: f.path, baseUrl: _baseUrl,)),
+                  );
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: createMjItemView(f),
+                ),
+              );
+            }, childCount: 3),
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+          ));
+  }
+
+  createMjItemView(TvInfo tvInfo){
+    if (tvInfo.picUrl != null && tvInfo.picUrl.isNotEmpty)
+      return <Widget>[
+        Image.network(
+          tvInfo.picUrl,
+          fit: BoxFit.fitHeight,
+          height: 150,
+        ),
+        Container(
+          child: Text(
+            tvInfo.title,
+            softWrap: false,
+            style: TextStyle(fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+          ),
+        )
+      ];
+    else  return <Widget>[
+      Container(
+        child: Text(
+          tvInfo.title,
+          softWrap: false,
+          style: TextStyle(fontSize: 14),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      Container(
+        child: Text(
+          tvInfo.number,
+          softWrap: false,
+          style: TextStyle(fontSize: 14),
+          overflow: TextOverflow.ellipsis,
+        ),
+      )
+    ];
+
+  }
+
+
   tvContentView() {
-    print('****[infos:' +
-        _currentTypes.toString() +
-        "****[catogr]:" +
-        _currentCatogrList.toString());
+//    print('****[infos:' +
+//        _currentTypes.toString() +
+//        "****[catogr]:" +
+//        _currentCatogrList.toString());
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.all(10),
@@ -330,7 +406,7 @@ class _HostPageState extends State<HostPage> {
               context,
               new MaterialPageRoute(
                   builder: (context) =>
-                      new ChewieDemo(title: f.title, url: f.path)),
+                      new ChewieDemo(title: f.title, url: f.path, baseUrl: _baseUrl,)),
             );
           },
           child: Column(
@@ -409,15 +485,24 @@ class _HostPageState extends State<HostPage> {
   }
 
   List<Widget> getChildren() {
-    if (_currentHeadIndex == 1) {
+    if (widget.type == 1) {
       return [
         creatSearchView(),
-        headerView(),
         weekItemHeader(),
-        weekItemView(mHomeModel.tabListInfos[_currentValue]),
+        weekItemGridView(mHomeModel.tabListInfos[_currentValue]),
+        tvContentView()
       ];
-    } else {
-      return [creatSearchView(), headerView(), tvContentView()];
+    }else if (widget.type == 0) {
+      if (_currentHeadIndex == 1) {
+        return [
+          creatSearchView(),
+          headerView(),
+          weekItemHeader(),
+          weekItemView(mHomeModel.tabListInfos[_currentValue]),
+        ];
+      } else {
+        return [creatSearchView(), headerView(), tvContentView()];
+      }
     }
   }
 }
