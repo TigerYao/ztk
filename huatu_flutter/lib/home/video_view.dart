@@ -49,6 +49,7 @@ class _VideoScaffoldState extends State<VideoScaffold> {
   void _onError(Object error) {
     setState(() {
       isSucces = false;
+      Navigator.pop(context);
     });
   }
 
@@ -56,11 +57,11 @@ class _VideoScaffoldState extends State<VideoScaffold> {
   void initState() {
     initListener();
 
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-    ]);
-    AutoOrientation.landscapeMode();
+//    SystemChrome.setPreferredOrientations([
+//      DeviceOrientation.landscapeRight,
+//      DeviceOrientation.landscapeLeft,
+//    ]);
+//    AutoOrientation.landscapeMode();
 
     super.initState();
   }
@@ -68,11 +69,11 @@ class _VideoScaffoldState extends State<VideoScaffold> {
   @override
   dispose() {
     cancle();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-    AutoOrientation.portraitMode();
+//    SystemChrome.setPreferredOrientations([
+//      DeviceOrientation.portraitUp,
+//      DeviceOrientation.portraitDown,
+//    ]);
+//    AutoOrientation.portraitMode();
     super.dispose();
   }
 
