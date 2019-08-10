@@ -1,20 +1,17 @@
-import 'package:huatu_flutter/api/api.dart';
+
 import 'package:huatu_flutter/api/dio_factory.dart';
-import 'package:huatu_flutter/model/recommend_info.dart';
 import 'package:huatu_flutter/model/home_model.dart';
 import 'package:dio/dio.dart';
-import 'package:huatu_flutter/model/top_info.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart';
-import 'dart:convert';
 import 'covert.dart';
 import 'urlencode.dart';
 
 class NetUtils {
   static const List weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   static const List navNames = ['最近连载', '2019新剧推荐', '即将开播'];
-  static const String baseUrl = "http://m.imomoe.io"; //"http://m.yhdm.tv";
+  static const String baseUrl = "http://m.imomoe.jp"; //"http://m.yhdm.tv";
   static const String meiju_base = "http://m.meijutt.com";
 
 //  static Future<RecommendInfo> getRecommendList() async {

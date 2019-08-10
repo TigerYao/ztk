@@ -92,6 +92,7 @@ class _SearchPageState extends State<SearchPage> {
                       ChewieDemo(
                         title: info.title,
                         url: info.path,
+                        baseUrl: NetUtils.baseUrl,
                       )
                   ));
             },

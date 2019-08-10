@@ -20,7 +20,7 @@ class HostPage extends StatefulWidget {
 class _HostPageState extends State<HostPage> {
 //  RecommendInfo mRecommendInfo;
 //  TopInfoModel mTopModel;
-  String _baseUrl;
+  String _baseUrl = NetUtils.baseUrl;
   String _searchPath;
   HomeModel mHomeModel;
   String _currentValue; //= widget.type == 0 ? NetUtils.weekNames[0]: NetUtils.navNames[0];

@@ -38,7 +38,7 @@ class _VideoScaffoldState extends State<VideoScaffold> {
       NetUtils.getVideoUrl(event).then((val) {
         setState(() {
           url = val;
-          print("url....jjj  "+ url);
+          print("url....jjj  " + url);
         });
       });
     } else {
@@ -81,9 +81,9 @@ class _VideoScaffoldState extends State<VideoScaffold> {
   Widget build(BuildContext context) {
     return (url == null || url.isEmpty || !isSucces)
         ? Center(
-            child: CircularProgressIndicator(),
-          )
+            child: CircularProgressIndicator(backgroundColor: Colors.yellow,))
         : Container(
+            color: Colors.white,
             child: new WebviewScaffold(
               url: url,
               withZoom: false,

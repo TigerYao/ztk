@@ -39,23 +39,27 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _listPages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: _bottomTabs,
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        fixedColor: Color(0xFFC91B3A),
-        onTap: (index){
-          if (index != _currentIndex)
-            setState(() {
-              _currentIndex = index;
-            });
-        },
-      ),
+      body: HostPage(0),
     );
+      
+//      Scaffold(
+//      body: IndexedStack(
+//        index: _currentIndex,
+//        children: _listPages,
+//      ),
+//      bottomNavigationBar: BottomNavigationBar(
+//        items: _bottomTabs,
+//        currentIndex: _currentIndex,
+//        type: BottomNavigationBarType.fixed,
+//        fixedColor: Color(0xFFC91B3A),
+//        onTap: (index){
+//          if (index != _currentIndex)
+//            setState(() {
+//              _currentIndex = index;
+//            });
+//        },
+//      ),
+//    );
   }
 
   @override

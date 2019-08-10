@@ -6,6 +6,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.umeng.message.PushAgent;
+
 import java.util.Map;
 
 import io.flutter.app.FlutterActivity;
@@ -19,6 +21,7 @@ public class MainActivity extends FlutterActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PushAgent.getInstance(context).onAppStart();
         GeneratedPluginRegistrant.registerWith(this);
         registerCustomPlugin(this);
 
@@ -51,7 +54,7 @@ public class MainActivity extends FlutterActivity {
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
-                    videoUrl = url;
+//                    videoUrl = url;
                     Log.d("Main..", "onPageFinished.url.." + videoUrl);
                     if (videoUrl != null && !videoUrl.isEmpty())
                         FlutterPluginCounter.onSendValue(videoUrl);
