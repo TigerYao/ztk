@@ -14,6 +14,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+
 public class WebVideoActivity extends Activity {
     private WebView webView;
 

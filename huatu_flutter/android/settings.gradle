@@ -1,4 +1,4 @@
-include ':app', ':jpush_lib'
+include ':app'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
 

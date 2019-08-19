@@ -10,18 +10,16 @@ import com.umeng.message.PushAgent;
 
 import java.util.Map;
 
-import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
-public class MainActivity extends FlutterActivity {
+public class MainActivity extends BaseActivity {
     WebView webView;
     String videoUrl = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PushAgent.getInstance(context).onAppStart();
         GeneratedPluginRegistrant.registerWith(this);
         registerCustomPlugin(this);
 

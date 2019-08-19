@@ -36,9 +36,9 @@ class _HostPageState extends State<HostPage> {
     _currentValue = widget.type == 0 ? NetUtils.weekNames[0]: NetUtils.navNames[0];
     switch (widget.type) {
       case 1:
-        _baseUrl = NetUtils.meiju_base;
+        _baseUrl = NetUtils.meiju_91base;
         _searchPath = '/search/index.asp';
-        NetUtils.requestDataMJ(NetUtils.meiju_base)
+        NetUtils.requestData91MJ(NetUtils.meiju_base)
             .then((value) => setState(() {
                   if (_mCataList == null) _mCataList = Map();
                   if (_mCatogryTypeList == null) _mCatogryTypeList = Map();
@@ -95,7 +95,7 @@ class _HostPageState extends State<HostPage> {
     return Container(
       padding: EdgeInsets.only(top: 10, bottom: 10),
       width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.width / 2 - 10,
+      height: MediaQuery.of(context).size.width / 2 - 20,
       child: Swiper(
         itemCount: sliders.length,
         itemBuilder: (context, index) {
@@ -488,7 +488,7 @@ class _HostPageState extends State<HostPage> {
     if (widget.type == 1) {
       return [
         creatSearchView(),
-        weekItemHeader(),
+        headerView(),
         weekItemGridView(mHomeModel.tabListInfos[_currentValue]),
         tvContentView()
       ];

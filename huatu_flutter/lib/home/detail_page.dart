@@ -47,6 +47,8 @@ class _ChewieDemoState extends State<ChewieDemo> {
   }
 
   createTagView() {
+    if (_detailModel.currentInfo.tags == null)
+      return Text(_detailModel.currentInfo.title);
     List<Widget> childrens = _detailModel.currentInfo.tags.map((info) {
       return Container(
         width: 200,

@@ -5,4 +5,7 @@
              Flutter draws its first frame -->
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>
+    <style name="Theme_Umeng_Push_Splash" parent="android:Theme.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@mipmap/umeng_push_default_splash_bg</item>
+    </style>
 </resources>

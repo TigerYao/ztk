@@ -17,7 +17,8 @@ class _HTAppState extends State<HTApp>{
   Widget build(BuildContext context) {
     // TODO: implement build
     return MaterialApp(
-      title: 'title',
+      title: '超级影漫',
+      debugShowCheckedModeBanner:false,
       theme: new ThemeData(
         primaryColor: Color(ThemeColor),
         backgroundColor: Color(0xFFEFEFEF),

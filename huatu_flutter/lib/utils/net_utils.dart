@@ -12,55 +12,23 @@ class NetUtils {
   static const List weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   static const List navNames = ['最近连载', '2019新剧推荐', '即将开播'];
   static const String baseUrl = "http://m.imomoe.jp"; //"http://m.yhdm.tv";
-  static const String meiju_base = "http://m.meijutt.com";
-
-//  static Future<RecommendInfo> getRecommendList() async {
-//    Dio _dio = DioFactory.getInstance().getDio();
-//    try {
-//      Response infos = await _dio.get(Api.RECOMMEND_URL);
-//      RecommendInfo baseMode = RecommendInfo.fromJson(infos.data);
-//      return baseMode;
-//    } on DioError catch (e) {
-//      if (e.response != null) {
-//        print(e.response.data);
-//        print(e.response.headers);
-//        print(e.response.request);
-//      } else {
-//        // Something happened in setting up or sending the request that triggered an Error
-//        print(e.request);
-//        print(e.message);
-//      }
-//    }
-//    return null;
-//  }
-
-//  static Future<TopInfoModel> getTopList() async {
-//    Dio _dio = DioFactory.getInstance().getDio();
-//    try {
-//      Response infos = await _dio.get(Api.TOP_LIST_URL);
-//      print(".....info....." + infos.data.toString());
-//      TopInfoModel baseMode = TopInfoModel.fromJson(infos.data);
-//      return baseMode;
-//    } on DioError catch (e) {
-//      if (e.response != null) {
-//        print(e.response.data);
-//        print(e.response.headers);
-//        print(e.response.request);
-//      } else {
-//        // Something happened in setting up or sending the request that triggered an Error
-//        print(e.request);
-//        print(e.message);
-//      }
-//    }
-//    return null;
-//  }
-
+  static const String meiju_91base = "https://91mjw.com/";
+  static const String meiju_base = meiju_91base;//"http://m.meijutt.com";
   static Future<String> getBody(String url) async {
-    print('getBody.url...' + url);
     var response = await http.get(url);
     if (response.statusCode == 200) {
-      String htmBody = gbk.decode(response.bodyBytes);
-//      print('getBody....' + htmBody);
+      List<Element> headerss = parse(response.body).head.querySelectorAll("meta");
+      bool isUtf8 = false;
+      for(Element headerEle in headerss){
+        if(!headerEle.attributes.toString().contains("charset"))
+          continue;
+//        print(isUtf8.toString() + '....getBody.headers...' + headerEle.attributes['charset'].toString());
+        isUtf8 = !(headerEle.attributes['charset'] == ('gb2312'));
+      }
+      if (isUtf8)
+        response.headers.putIfAbsent('charset', () => 'utf-8');
+      String htmBody = isUtf8 ?  response.body : gbk.decode(response.bodyBytes);
+      print(isUtf8.toString() + '....getBody.htmBody...' + htmBody);
       return htmBody;
     }
     return null;
@@ -82,7 +50,58 @@ class NetUtils {
     }
     return null;
   }
-
+  static Future<HomeModel> requestData91MJ(String url) async {
+    HomeModel homeModel = HomeModel();
+    String htmBody = await getBody(url);
+    if (htmBody == null) return null;
+    Document document = parse(htmBody);
+    List<Element> navEles = document.querySelectorAll(".nav > li");
+    for(Element element in navEles){
+      if (element.className == "navmore")
+        continue;
+      Element aTag = element.querySelector("a");
+      String title = aTag.text;
+      String path = aTag.attributes['href'];
+      Element subEls = element.querySelector(".sub-menu");
+      if (subEls != null) {
+        List<Element> subMenuEls = subEls.querySelectorAll("li");
+        for(Element subEle in subMenuEls){
+          Element aTags = subEle.querySelector("a");
+          String title = aTags.text;
+          String path = aTags.attributes['href'];
+          homeModel.headerInfos.add(TvInfo(path: path, title: title));
+        }
+      }else
+        homeModel.headerInfos.add(TvInfo(path: path, title: title));
+    }
+    List<Element> slideEls = document.getElementById('slider').querySelectorAll(".item");
+    for(Element slideEle in slideEls){
+      Element hrefTag = slideEle.querySelector('a');
+      String path = hrefTag.attributes['href'];
+      if (!path.contains(meiju_91base))
+        continue;
+      String imgPath = hrefTag.querySelector('img').attributes['src'];
+      String title = hrefTag.querySelector('span').text;
+      homeModel.sliderInfos.add(TvInfo(path: path,picUrl: imgPath, title: title));
+    }
+    List<Element> moviesEls = document.getElementsByClassName('m-movies');
+    for(Element movieEl in moviesEls){
+      String topTitle = movieEl.querySelector('.title > strong > a').text;
+      String topPath = movieEl.querySelector('.title > strong > a').attributes['href'];
+      homeModel.catorgreList.putIfAbsent(topTitle, ()=>List<TvInfo>());
+      homeModel.infos.add(TvInfo(path: topPath, title: topTitle));
+      List<Element> movieList = movieEl.getElementsByClassName("u-movie");
+      for(Element movie in movieList){
+        Element aTagEle = movie.querySelector('a');
+        String title = aTagEle.querySelector('h2').text;
+        String path = aTagEle.attributes['href'];
+        String imgPath = aTagEle.querySelector('div > img').attributes['data-original'];
+        String numb= movie.querySelector(".zhuangtai > span").text;
+        homeModel.catorgreList[topTitle].add(TvInfo(path: path, picUrl: imgPath, title: title, number: numb));
+      }
+    }
+    return homeModel;
+  }
   static Future<HomeModel> requestDataMJ(String url) async {
     HomeModel homeModel = HomeModel();
     String htmBody = await getBody(url);
@@ -281,7 +300,34 @@ class NetUtils {
     }
     return infoList;
   }
+  static Future<TvDetailModel> getIntro91Mj(String url) async {
+    String body = await getBody(url);
+    if (body == null) return null;
+    TvDetailModel detailModel = TvDetailModel();
+    Document document = parse(body);
+    String picUrl = document.querySelector('.video_img > img').attributes['src'];
+    String info = document.querySelector('.video_info').outerHtml;
+    info = info.replaceAll('<strong>', '');
+    info = info.replaceAll('</strong>', '');
 
+    String jianjie = document.querySelector('.jianjie > span').text.replaceAll('<br>', '\n');
+    String title = document.querySelector('.article-title > a').text;
+    detailModel.currentInfo = TvInfo(picUrl: picUrl, title: title, tvDescription: jianjie);
+    List<String> tagsSp = info.split('<br />');
+    if (tagsSp.length > 4)
+    tagsSp = tagsSp.getRange(3, tagsSp.length);
+    detailModel.currentInfo.tags =  tagsSp.map((f) => f.replaceAll('<br>', "")).toList();
+//   if(detailModel.currentInfo.tags.length > 4)
+//    detailModel.currentInfo.tags =  detailModel.currentInfo.tags.sublist(3, detailModel.currentInfo.tags.length -1);
+    detailModel.playLists = List();
+    List<Element> numList = document.getElementById('video_list_li').querySelectorAll('a');
+    for(Element numEl in numList){
+      String num = numEl.text;
+      String path = url + '/vplay/'+numEl.attributes['id']+'.html';
+      detailModel.playLists.add(TvInfo(number: num,path: path));
+    }
+    return detailModel;
+  }
   static Future<TvDetailModel> getIntroMj(String url) async {
     String body = await getBody(url);
     if (body == null) return null;
@@ -320,6 +366,7 @@ class NetUtils {
   }
 
   static Future<TvDetailModel> getIntro(String url) async {
+    if (url.startsWith(meiju_91base)) return await getIntro91Mj(url);
     if (url.startsWith(meiju_base)) return await getIntroMj(url);
     String body = await getBody(url);
     if (body == null) return null;
