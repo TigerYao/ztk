@@ -5,6 +5,8 @@ import 'package:huatu_flutter/utils/net_utils.dart';
 import 'detail_page.dart';
 import 'search_page.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
+
 class HostPage extends StatefulWidget {
   int type;
 
@@ -23,7 +25,8 @@ class _HostPageState extends State<HostPage> {
   String _baseUrl = NetUtils.baseUrl;
   String _searchPath;
   HomeModel mHomeModel;
-  String _currentValue; //= widget.type == 0 ? NetUtils.weekNames[0]: NetUtils.navNames[0];
+  String
+      _currentValue; //= widget.type == 0 ? NetUtils.weekNames[0]: NetUtils.navNames[0];
   int _currentHeadIndex = 0;
   Map<String, Map<String, List<TvInfo>>> _mCataList;
   Map<String, List<TvInfo>> _mCatogryTypeList;
@@ -33,7 +36,8 @@ class _HostPageState extends State<HostPage> {
   @override
   void initState() {
     super.initState();
-    _currentValue = widget.type == 0 ? NetUtils.weekNames[0]: NetUtils.navNames[0];
+    _currentValue =
+        widget.type == 0 ? NetUtils.weekNames[0] : NetUtils.navNames[0];
     switch (widget.type) {
       case 1:
         _baseUrl = NetUtils.meiju_91base;
@@ -75,6 +79,7 @@ class _HostPageState extends State<HostPage> {
   }
 
   fetchDatas(String url) {
+    if (!url.contains(_baseUrl)) url = _baseUrl + url;
     if (_mCatogryTypeList.containsKey(url))
       _currentTypes = _mCatogryTypeList[url];
     if (_mCataList.containsKey(url)) _currentCatogrList = _mCataList[url];
@@ -104,8 +109,11 @@ class _HostPageState extends State<HostPage> {
             child: Stack(
               alignment: Alignment.bottomLeft,
               children: <Widget>[
-                Image.network(
-                  sliders[index].picUrl,
+                new CachedNetworkImage(
+                  imageUrl: sliders[index].picUrl,
+                  placeholder: (context, url) => Center(
+                    child: new CircularProgressIndicator(),
+                  ),
                   fit: BoxFit.fill,
                   width: MediaQuery.of(context).size.width,
                 ),
@@ -131,8 +139,8 @@ class _HostPageState extends State<HostPage> {
           Navigator.push(
             context,
             new MaterialPageRoute(
-                builder: (context) =>
-                    new ChewieDemo(title: f.title, url: f.path, baseUrl: _baseUrl)),
+                builder: (context) => new ChewieDemo(
+                    title: f.title, url: f.path, baseUrl: _baseUrl)),
           );
         },
         viewportFraction: 0.9,
@@ -156,9 +164,7 @@ class _HostPageState extends State<HostPage> {
               String url = _baseUrl;
               _currentCatogrList = Map();
               _currentTypes = List();
-              if (index == 0)
-                fetchDatas(url);
-              else if (index > 1) fetchDatas(url + tvInfo.path);
+              fetchDatas(tvInfo.path == null ? url : tvInfo.path);
               setState(() {});
             },
             child: Container(
@@ -242,8 +248,11 @@ class _HostPageState extends State<HostPage> {
                   Navigator.push(
                     context,
                     new MaterialPageRoute(
-                        builder: (context) =>
-                            new ChewieDemo(title: f.title, url: f.path, baseUrl: _baseUrl,)),
+                        builder: (context) => new ChewieDemo(
+                              title: f.title,
+                              url: f.path,
+                              baseUrl: _baseUrl,
+                            )),
                   );
                 },
                 child: Column(
@@ -297,8 +306,11 @@ class _HostPageState extends State<HostPage> {
                   Navigator.push(
                     context,
                     new MaterialPageRoute(
-                        builder: (context) =>
-                        new ChewieDemo(title: f.title, url: f.path, baseUrl: _baseUrl,)),
+                        builder: (context) => new ChewieDemo(
+                              title: f.title,
+                              url: f.path,
+                              baseUrl: _baseUrl,
+                            )),
                   );
                 },
                 child: Column(
@@ -312,11 +324,15 @@ class _HostPageState extends State<HostPage> {
           ));
   }
 
-  createMjItemView(TvInfo tvInfo){
+  createMjItemView(TvInfo tvInfo) {
     if (tvInfo.picUrl != null && tvInfo.picUrl.isNotEmpty)
       return <Widget>[
-        Image.network(
-          tvInfo.picUrl,
+        new CachedNetworkImage(
+          imageUrl: tvInfo.picUrl,
+          placeholder: (context, url) => Center(
+            child: new CircularProgressIndicator(),
+          ),
+          errorWidget: (context, url, error) => new Icon(Icons.error),
           fit: BoxFit.fitHeight,
           height: 150,
         ),
@@ -329,27 +345,26 @@ class _HostPageState extends State<HostPage> {
           ),
         )
       ];
-    else  return <Widget>[
-      Container(
-        child: Text(
-          tvInfo.title,
-          softWrap: false,
-          style: TextStyle(fontSize: 14),
-          overflow: TextOverflow.ellipsis,
+    else
+      return <Widget>[
+        Container(
+          child: Text(
+            tvInfo.title,
+            softWrap: false,
+            style: TextStyle(fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-      ),
-      Container(
-        child: Text(
-          tvInfo.number,
-          softWrap: false,
-          style: TextStyle(fontSize: 14),
-          overflow: TextOverflow.ellipsis,
-        ),
-      )
-    ];
-
+        Container(
+          child: Text(
+            tvInfo.number,
+            softWrap: false,
+            style: TextStyle(fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+          ),
+        )
+      ];
   }
-
 
   tvContentView() {
 //    print('****[infos:' +
@@ -405,15 +420,18 @@ class _HostPageState extends State<HostPage> {
             Navigator.push(
               context,
               new MaterialPageRoute(
-                  builder: (context) =>
-                      new ChewieDemo(title: f.title, url: f.path, baseUrl: _baseUrl,)),
+                  builder: (context) => new ChewieDemo(
+                        title: f.title,
+                        url: f.path,
+                        baseUrl: _baseUrl,
+                      )),
             );
           },
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              Image.network(
-                f.picUrl,
+              new CachedNetworkImage(
+                imageUrl: f.picUrl,
                 fit: BoxFit.fitHeight,
                 height: 150,
               ),
@@ -492,7 +510,7 @@ class _HostPageState extends State<HostPage> {
         weekItemGridView(mHomeModel.tabListInfos[_currentValue]),
         tvContentView()
       ];
-    }else if (widget.type == 0) {
+    } else if (widget.type == 0) {
       if (_currentHeadIndex == 1) {
         return [
           creatSearchView(),

@@ -5,14 +5,11 @@ import android.content.Context;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
-import com.miui.zeus.mimo.sdk.MimoSdk;
-import com.miui.zeus.mimo.sdk.api.IMimoSdkListener;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.commonsdk.UMConfigure;
 import com.umeng.message.IUmengRegisterCallback;
 import com.umeng.message.PushAgent;
 import com.umeng.message.UmengMessageHandler;
-import com.umeng.message.UmengNotificationClickHandler;
 import com.umeng.message.entity.UMessage;
 import com.umeng.message.inapp.InAppMessageManager;
 
@@ -28,17 +25,17 @@ public class CustomApplication extends FlutterApplication {
         UMConfigure.init(this, "5d4ea5e24ca357255300088e", "superman", UMConfigure.DEVICE_TYPE_PHONE, "e6fec877a93344eb31aad132e32790ac");
         // 选用AUTO页面采集模式
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.AUTO);
-        MimoSdk.init(this, "2882303761518119108", "5891811917108", "fake_app_token", new IMimoSdkListener() {
-            @Override
-            public void onSdkInitSuccess() {
-                Log.i(TAG,"注册成功：onSdkInitSuccess：-------->  ");
-            }
-
-            @Override
-            public void onSdkInitFailed() {
-                Log.i(TAG,"注册成功：onSdkInitFailed：-------->  ");
-            }
-        });
+//        MimoSdk.init(this, "2882303761518119108", "5891811917108", "fake_app_token", new IMimoSdkListener() {
+//            @Override
+//            public void onSdkInitSuccess() {
+//                Log.i(TAG,"注册成功：onSdkInitSuccess：-------->  ");
+//            }
+//
+//            @Override
+//            public void onSdkInitFailed() {
+//                Log.i(TAG,"注册成功：onSdkInitFailed：-------->  ");
+//            }
+//        });
         mPushAgent = PushAgent.getInstance(this.getApplicationContext());
         mPushAgent.register(new IUmengRegisterCallback() {
             @Override

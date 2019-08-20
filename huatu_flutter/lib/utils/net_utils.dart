@@ -16,6 +16,7 @@ class NetUtils {
   static const String meiju_base = meiju_91base;//"http://m.meijutt.com";
   static Future<String> getBody(String url) async {
     var response = await http.get(url);
+    print('getBody.url...' + url + '.....');
     if (response.statusCode == 200) {
       List<Element> headerss = parse(response.body).head.querySelectorAll("meta");
       bool isUtf8 = false;
@@ -56,6 +57,7 @@ class NetUtils {
     if (htmBody == null) return null;
     Document document = parse(htmBody);
     List<Element> navEles = document.querySelectorAll(".nav > li");
+    List<TvInfo> subMenu = List();
     for(Element element in navEles){
       if (element.className == "navmore")
         continue;
@@ -69,11 +71,13 @@ class NetUtils {
           Element aTags = subEle.querySelector("a");
           String title = aTags.text;
           String path = aTags.attributes['href'];
-          homeModel.headerInfos.add(TvInfo(path: path, title: title));
+          subMenu.add(TvInfo(path: path, title: title));
         }
       }else
         homeModel.headerInfos.add(TvInfo(path: path, title: title));
     }
+    if (subMenu != null && subMenu.isNotEmpty)
+      homeModel.headerInfos.addAll(subMenu);
     List<Element> slideEls = document.getElementById('slider').querySelectorAll(".item");
     for(Element slideEle in slideEls){
       Element hrefTag = slideEle.querySelector('a');
@@ -101,6 +105,29 @@ class NetUtils {
       }
     }
     return homeModel;
+  }
+
+  static List getCateList91Mj(Document document) {
+    Map<String, List<TvInfo>> catorgreList = Map();
+    List<TvInfo> infos = List();
+//    List<Element> moviesEls = document.getElementsByClassName('u-movie');
+//    print("getCateList91Mj===" + moviesEls.toString());
+//    for(Element movieEl in moviesEls){
+      String topTitle = "最新";//movieEl.querySelector('.title > strong > a').text;
+      String topPath = '/';//movieEl.querySelector('.title > strong > a').attributes['href'];
+      catorgreList.putIfAbsent(topTitle, ()=>List<TvInfo>());
+      infos.add(TvInfo(path: topPath, title: topTitle));
+      List<Element> movieList = document.getElementsByClassName("u-movie");
+      for(Element movie in movieList){
+        Element aTagEle = movie.querySelector('a');
+        String title = aTagEle.querySelector('h2').text;
+        String path = aTagEle.attributes['href'];
+        String imgPath = aTagEle.querySelector('div > img').attributes['data-original'];
+        String numb= movie.querySelector(".zhuangtai > span").text;
+        catorgreList[topTitle].add(TvInfo(path: path, picUrl: imgPath, title: title, number: numb));
+//      }
+    }
+    return [infos, catorgreList];
   }
   static Future<HomeModel> requestDataMJ(String url) async {
     HomeModel homeModel = HomeModel();
@@ -285,7 +312,7 @@ class NetUtils {
     String body = await getBody(url);
     if (body == null) return null;
     Document document = parse(body);
-    return getCateList1(document);
+    return url.contains(meiju_91base) ?  getCateList91Mj(document) : getCateList1(document);
   }
 
   static List<TvInfo> getPlayList(Document document) {
@@ -313,10 +340,15 @@ class NetUtils {
     String jianjie = document.querySelector('.jianjie > span').text.replaceAll('<br>', '\n');
     String title = document.querySelector('.article-title > a').text;
     detailModel.currentInfo = TvInfo(picUrl: picUrl, title: title, tvDescription: jianjie);
-    List<String> tagsSp = info.split('<br />');
-    if (tagsSp.length > 4)
-    tagsSp = tagsSp.getRange(3, tagsSp.length);
-    detailModel.currentInfo.tags =  tagsSp.map((f) => f.replaceAll('<br>', "")).toList();
+    List<String> tagsSp = info.split('<br>');
+    detailModel.currentInfo.tags = List();
+    if (tagsSp.length > 8) {
+     for(int i = 3;i < tagsSp.length - 4 ; i++) {
+       String value = tagsSp[i].replaceAll('<br>', "");
+       detailModel.currentInfo.tags.add(value);
+     }
+    }else
+      detailModel.currentInfo.tags =  tagsSp.map((f) => f.replaceAll('<br>', "")).toList();
 //   if(detailModel.currentInfo.tags.length > 4)
 //    detailModel.currentInfo.tags =  detailModel.currentInfo.tags.sublist(3, detailModel.currentInfo.tags.length -1);
     detailModel.playLists = List();

@@ -43,16 +43,22 @@ public class MainActivity extends BaseActivity {
                 public void onLoadResource(WebView view, String url) {
                     super.onLoadResource(view, url);
                     Log.d("Main..", "onLoadResource.url.." + url);
-                    if (url.contains("vid=") && (url.contains("mp4") || url.contains("m3u8"))) {
+                    if (url.endsWith("index.m3u8")){
+                        videoUrl = url;
+                    }else if (url.contains("vid=") && (url.contains("mp4") || url.contains("m3u8"))) {
                         videoUrl = url;
                         Log.d("vid==", url);
+                    }
+                    if (videoUrl != null) {
+                        FlutterPluginCounter.onSendValue(videoUrl);
+                        view.stopLoading();
                     }
                 }
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
-//                    videoUrl = url;
+                    videoUrl = url;
                     Log.d("Main..", "onPageFinished.url.." + videoUrl);
                     if (videoUrl != null && !videoUrl.isEmpty())
                         FlutterPluginCounter.onSendValue(videoUrl);

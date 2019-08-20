@@ -34,16 +34,8 @@ class _VideoScaffoldState extends State<VideoScaffold> {
   void onEvent(Object event) {
     url = event;
     isSucces = true;
-    if (url.contains("get.json")) {
-      NetUtils.getVideoUrl(event).then((val) {
-        setState(() {
-          url = val;
-          print("url....jjj  " + url);
-        });
-      });
-    } else {
-      setState(() {});
-    }
+    print("url....jjj  " + url);
+    setState(() {});
   }
 
   void _onError(Object error) {

@@ -7,6 +7,7 @@ import 'package:huatu_flutter/utils/net_utils.dart';
 import 'package:huatu_flutter/model/home_model.dart';
 import 'package:huatu_flutter/utils/jump_natvie.dart';
 import 'video_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ChewieDemo extends StatefulWidget {
   ChewieDemo({this.title = 'Chewie Demo', this.url, this.baseUrl});
@@ -55,21 +56,26 @@ class _ChewieDemoState extends State<ChewieDemo> {
         padding: EdgeInsets.only(right: 5),
         child: Text(
           info,
-          style: TextStyle(fontSize: 12, color: Colors.white),
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+          ),
           textAlign: TextAlign.left,
         ),
       );
     }).toList();
-    Widget btn = RaisedButton(
-      onPressed: () {
-        _jumpVideo(widget.baseUrl + _detailModel.currentInfo.path);
-      },
-      child: Text('立即播放'),
-      color: Colors.lightGreenAccent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-    );
+//    Widget btn = RaisedButton(
+//      onPressed: () {
+//        _jumpVideo(_detailModel.currentInfo.path);
+//      },
+//      child: Text('立即播放'),
+//      color: Colors.lightGreenAccent,
+//      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+//    );
     return Column(
-      children: <Widget>[Column(children: childrens), btn],
+      children: <Widget>[Column(children: childrens)],
     );
 //    return ListView.builder(
 //      itemCount: _detailModel.currentInfo.tags.length,
@@ -122,7 +128,7 @@ class _ChewieDemoState extends State<ChewieDemo> {
         TvInfo f = _detailModel.playLists[index];
         return RaisedButton(
           onPressed: () {
-            _jumpVideo(widget.baseUrl + f.path);
+            _jumpVideo(f.path);
           },
           child: Text(
             f.number,
@@ -139,13 +145,14 @@ class _ChewieDemoState extends State<ChewieDemo> {
   createBodyTop() {
     return Container(
       alignment: Alignment.centerLeft,
-//      height: MediaQuery.of(context).size.width * 9 / 16,
       width: MediaQuery.of(context).size.width,
       child: Stack(
         alignment: Alignment.centerLeft,
         children: <Widget>[
-          Image.network(
-            _detailModel.currentInfo.picUrl,
+          new CachedNetworkImage(
+            imageUrl: _detailModel.currentInfo.picUrl,
+            placeholder: (context, url) => Center(child: new CircularProgressIndicator(),),
+            errorWidget: (context, url, error) => new SizedBox.fromSize(),
             fit: BoxFit.fill,
             height: MediaQuery.of(context).size.width * 9 / 16,
             width: MediaQuery.of(context).size.width,
@@ -161,8 +168,10 @@ class _ChewieDemoState extends State<ChewieDemo> {
           Positioned(
             left: 10,
             width: 120,
-            child: Image.network(
-              _detailModel.currentInfo.picUrl,
+            child: new CachedNetworkImage(
+              imageUrl: _detailModel.currentInfo.picUrl,
+              placeholder: (context, url) => Center(child: new CircularProgressIndicator(),),
+              errorWidget: (context, url, error) => new Icon(Icons.landscape),
               fit: BoxFit.cover,
 //              height: MediaQuery.of(context).size.width * 9 / 16,
 //              width: MediaQuery.of(context).size.width,
@@ -222,6 +231,7 @@ class _ChewieDemoState extends State<ChewieDemo> {
   }
 
   _jumpVideo(String url) {
+    if (!url.startsWith('http')) url = widget.baseUrl + url;
     _jumpNativie
         .jumpToNativeWithValue("webview_video", "getVideo", url)
         .then((value) {

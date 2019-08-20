@@ -54,20 +54,20 @@
         </activity>
 
 
-        <activity
-        android:name="com.miui.zeus.mimo.sdk.activityProxy.ProxyActivity"
-        android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-        android:exported="false"
-        android:hardwareAccelerated="true"
-        android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
-        ​
-        <activity
-            android:name="com.miui.zeus.mimo.sdk.activityProxy.FullScreenProxyActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:exported="false"
-            android:hardwareAccelerated="true"
-            android:screenOrientation="behind"
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" />
+        <!--<activity-->
+        <!--android:name="com.miui.zeus.mimo.sdk.activityProxy.ProxyActivity"-->
+        <!--android:configChanges="keyboard|keyboardHidden|orientation|screenSize"-->
+        <!--android:exported="false"-->
+        <!--android:hardwareAccelerated="true"-->
+        <!--android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />-->
+        <!--​-->
+        <!--<activity-->
+            <!--android:name="com.miui.zeus.mimo.sdk.activityProxy.FullScreenProxyActivity"-->
+            <!--android:configChanges="keyboard|keyboardHidden|orientation|screenSize"-->
+            <!--android:exported="false"-->
+            <!--android:hardwareAccelerated="true"-->
+            <!--android:screenOrientation="behind"-->
+            <!--android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" />-->
 
         <!--<provider-->
             <!--android:name="android.support.v4.content.FileProvider"-->
