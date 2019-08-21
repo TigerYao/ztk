@@ -79,11 +79,12 @@ class _HostPageState extends State<HostPage> {
   }
 
   fetchDatas(String url) {
+
     if (!url.contains(_baseUrl)) url = _baseUrl + url;
     if (_mCatogryTypeList.containsKey(url))
       _currentTypes = _mCatogryTypeList[url];
     if (_mCataList.containsKey(url)) _currentCatogrList = _mCataList[url];
-    if (!_mCatogryTypeList.containsKey(url) || !_mCataList.containsKey(url)) {
+    if (_currentCatogrList == null || _currentCatogrList.isEmpty || !_mCatogryTypeList.containsKey(url) || !_mCataList.containsKey(url)) {
       NetUtils.fetchDataByCategory(url).then((value) {
         setState(() {
           _currentTypes = value[0];

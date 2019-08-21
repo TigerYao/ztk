@@ -1,4 +1,4 @@
-
+import 'package:flutter/foundation.dart';
 import 'package:huatu_flutter/api/dio_factory.dart';
 import 'package:huatu_flutter/model/home_model.dart';
 import 'package:dio/dio.dart';
@@ -12,23 +12,22 @@ class NetUtils {
   static const List weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   static const List navNames = ['最近连载', '2019新剧推荐', '即将开播'];
   static const String baseUrl = "http://m.imomoe.jp"; //"http://m.yhdm.tv";
-  static const String meiju_91base = "https://91mjw.com/";
-  static const String meiju_base = meiju_91base;//"http://m.meijutt.com";
+  static const String meiju_91base = "https://91mjw.com";
+  static const String meiju_base = meiju_91base; //"http://m.meijutt.com";
   static Future<String> getBody(String url) async {
     var response = await http.get(url);
     print('getBody.url...' + url + '.....');
     if (response.statusCode == 200) {
-      List<Element> headerss = parse(response.body).head.querySelectorAll("meta");
+      List<Element> headerss =
+          parse(response.body).head.querySelectorAll("meta");
       bool isUtf8 = false;
-      for(Element headerEle in headerss){
-        if(!headerEle.attributes.toString().contains("charset"))
-          continue;
+      for (Element headerEle in headerss) {
+        if (!headerEle.attributes.toString().contains("charset")) continue;
 //        print(isUtf8.toString() + '....getBody.headers...' + headerEle.attributes['charset'].toString());
         isUtf8 = !(headerEle.attributes['charset'] == ('gb2312'));
       }
-      if (isUtf8)
-        response.headers.putIfAbsent('charset', () => 'utf-8');
-      String htmBody = isUtf8 ?  response.body : gbk.decode(response.bodyBytes);
+      if (isUtf8) response.headers.putIfAbsent('charset', () => 'utf-8');
+      String htmBody = isUtf8 ? response.body : gbk.decode(response.bodyBytes);
       print(isUtf8.toString() + '....getBody.htmBody...' + htmBody);
       return htmBody;
     }
@@ -51,6 +50,7 @@ class NetUtils {
     }
     return null;
   }
+
   static Future<HomeModel> requestData91MJ(String url) async {
     HomeModel homeModel = HomeModel();
     String htmBody = await getBody(url);
@@ -58,50 +58,53 @@ class NetUtils {
     Document document = parse(htmBody);
     List<Element> navEles = document.querySelectorAll(".nav > li");
     List<TvInfo> subMenu = List();
-    for(Element element in navEles){
-      if (element.className == "navmore")
-        continue;
+    for (Element element in navEles) {
+      if (element.className == "navmore") continue;
       Element aTag = element.querySelector("a");
       String title = aTag.text;
       String path = aTag.attributes['href'];
       Element subEls = element.querySelector(".sub-menu");
       if (subEls != null) {
         List<Element> subMenuEls = subEls.querySelectorAll("li");
-        for(Element subEle in subMenuEls){
+        for (Element subEle in subMenuEls) {
           Element aTags = subEle.querySelector("a");
           String title = aTags.text;
           String path = aTags.attributes['href'];
           subMenu.add(TvInfo(path: path, title: title));
         }
-      }else
+      } else
         homeModel.headerInfos.add(TvInfo(path: path, title: title));
     }
     if (subMenu != null && subMenu.isNotEmpty)
       homeModel.headerInfos.addAll(subMenu);
-    List<Element> slideEls = document.getElementById('slider').querySelectorAll(".item");
-    for(Element slideEle in slideEls){
+    List<Element> slideEls =
+        document.getElementById('slider').querySelectorAll(".item");
+    for (Element slideEle in slideEls) {
       Element hrefTag = slideEle.querySelector('a');
       String path = hrefTag.attributes['href'];
-      if (!path.contains(meiju_91base))
-        continue;
+      if (!path.contains(meiju_91base)) continue;
       String imgPath = hrefTag.querySelector('img').attributes['src'];
       String title = hrefTag.querySelector('span').text;
-      homeModel.sliderInfos.add(TvInfo(path: path,picUrl: imgPath, title: title));
+      homeModel.sliderInfos
+          .add(TvInfo(path: path, picUrl: imgPath, title: title));
     }
     List<Element> moviesEls = document.getElementsByClassName('m-movies');
-    for(Element movieEl in moviesEls){
+    for (Element movieEl in moviesEls) {
       String topTitle = movieEl.querySelector('.title > strong > a').text;
-      String topPath = movieEl.querySelector('.title > strong > a').attributes['href'];
-      homeModel.catorgreList.putIfAbsent(topTitle, ()=>List<TvInfo>());
+      String topPath =
+          movieEl.querySelector('.title > strong > a').attributes['href'];
+      homeModel.catorgreList.putIfAbsent(topTitle, () => List<TvInfo>());
       homeModel.infos.add(TvInfo(path: topPath, title: topTitle));
       List<Element> movieList = movieEl.getElementsByClassName("u-movie");
-      for(Element movie in movieList){
+      for (Element movie in movieList) {
         Element aTagEle = movie.querySelector('a');
         String title = aTagEle.querySelector('h2').text;
         String path = aTagEle.attributes['href'];
-        String imgPath = aTagEle.querySelector('div > img').attributes['data-original'];
-        String numb= movie.querySelector(".zhuangtai > span").text;
-        homeModel.catorgreList[topTitle].add(TvInfo(path: path, picUrl: imgPath, title: title, number: numb));
+        String imgPath =
+            aTagEle.querySelector('div > img').attributes['data-original'];
+        String numb = movie.querySelector(".zhuangtai > span").text;
+        homeModel.catorgreList[topTitle].add(
+            TvInfo(path: path, picUrl: imgPath, title: title, number: numb));
       }
     }
     return homeModel;
@@ -113,22 +116,28 @@ class NetUtils {
 //    List<Element> moviesEls = document.getElementsByClassName('u-movie');
 //    print("getCateList91Mj===" + moviesEls.toString());
 //    for(Element movieEl in moviesEls){
-      String topTitle = "最新";//movieEl.querySelector('.title > strong > a').text;
-      String topPath = '/';//movieEl.querySelector('.title > strong > a').attributes['href'];
-      catorgreList.putIfAbsent(topTitle, ()=>List<TvInfo>());
-      infos.add(TvInfo(path: topPath, title: topTitle));
-      List<Element> movieList = document.getElementsByClassName("u-movie");
-      for(Element movie in movieList){
-        Element aTagEle = movie.querySelector('a');
-        String title = aTagEle.querySelector('h2').text;
-        String path = aTagEle.attributes['href'];
-        String imgPath = aTagEle.querySelector('div > img').attributes['data-original'];
-        String numb= movie.querySelector(".zhuangtai > span").text;
-        catorgreList[topTitle].add(TvInfo(path: path, picUrl: imgPath, title: title, number: numb));
+    String topTitle = "最新"; //movieEl.querySelector('.title > strong > a').text;
+    String topPath =
+        '/'; //movieEl.querySelector('.title > strong > a').attributes['href'];
+    catorgreList.putIfAbsent(topTitle, () => List<TvInfo>());
+    infos.add(TvInfo(path: topPath, title: topTitle));
+    List<Element> movieList = document.getElementsByClassName("u-movie");
+    for (Element movie in movieList) {
+      Element aTagEle = movie.querySelector('a');
+      String title = aTagEle.querySelector('h2').text;
+      String path = aTagEle.attributes['href'];
+      String imgPath =
+          aTagEle.querySelector('div > img').attributes['data-original'];
+      String numb = movie.querySelector(".zhuangtai > span").text;
+      catorgreList[topTitle]
+          .add(TvInfo(path: path, picUrl: imgPath, title: title, number: numb));
 //      }
     }
+//    if (catorgreList[topTitle] == null || catorgreList[topTitle].isEmpty)
+//      catorgreList = null;
     return [infos, catorgreList];
   }
+
   static Future<HomeModel> requestDataMJ(String url) async {
     HomeModel homeModel = HomeModel();
     String htmBody = await getBody(url);
@@ -312,7 +321,9 @@ class NetUtils {
     String body = await getBody(url);
     if (body == null) return null;
     Document document = parse(body);
-    return url.contains(meiju_91base) ?  getCateList91Mj(document) : getCateList1(document);
+    return url.contains(meiju_91base)
+        ? getCateList91Mj(document)
+        : getCateList1(document);
   }
 
   static List<TvInfo> getPlayList(Document document) {
@@ -327,39 +338,46 @@ class NetUtils {
     }
     return infoList;
   }
+
   static Future<TvDetailModel> getIntro91Mj(String url) async {
     String body = await getBody(url);
     if (body == null) return null;
     TvDetailModel detailModel = TvDetailModel();
     Document document = parse(body);
-    String picUrl = document.querySelector('.video_img > img').attributes['src'];
+    String picUrl =
+        document.querySelector('.video_img > img').attributes['src'];
     String info = document.querySelector('.video_info').outerHtml;
     info = info.replaceAll('<strong>', '');
     info = info.replaceAll('</strong>', '');
 
-    String jianjie = document.querySelector('.jianjie > span').text.replaceAll('<br>', '\n');
+    String jianjie =
+        document.querySelector('.jianjie > span').text.replaceAll('<br>', '\n');
     String title = document.querySelector('.article-title > a').text;
-    detailModel.currentInfo = TvInfo(picUrl: picUrl, title: title, tvDescription: jianjie);
+    detailModel.currentInfo =
+        TvInfo(picUrl: picUrl, title: title, tvDescription: jianjie);
     List<String> tagsSp = info.split('<br>');
     detailModel.currentInfo.tags = List();
     if (tagsSp.length > 8) {
-     for(int i = 3;i < tagsSp.length - 4 ; i++) {
-       String value = tagsSp[i].replaceAll('<br>', "");
-       detailModel.currentInfo.tags.add(value);
-     }
-    }else
-      detailModel.currentInfo.tags =  tagsSp.map((f) => f.replaceAll('<br>', "")).toList();
+      for (int i = 3; i < tagsSp.length - 4; i++) {
+        String value = tagsSp[i].replaceAll('<br>', "");
+        detailModel.currentInfo.tags.add(value);
+      }
+    } else
+      detailModel.currentInfo.tags =
+          tagsSp.map((f) => f.replaceAll('<br>', "")).toList();
 //   if(detailModel.currentInfo.tags.length > 4)
 //    detailModel.currentInfo.tags =  detailModel.currentInfo.tags.sublist(3, detailModel.currentInfo.tags.length -1);
     detailModel.playLists = List();
-    List<Element> numList = document.getElementById('video_list_li').querySelectorAll('a');
-    for(Element numEl in numList){
+    List<Element> numList =
+        document.getElementById('video_list_li').querySelectorAll('a');
+    for (Element numEl in numList) {
       String num = numEl.text;
-      String path = url + '/vplay/'+numEl.attributes['id']+'.html';
-      detailModel.playLists.add(TvInfo(number: num,path: path));
+      String path = url + '/vplay/' + numEl.attributes['id'] + '.html';
+      detailModel.playLists.add(TvInfo(number: num, path: path));
     }
     return detailModel;
   }
+
   static Future<TvDetailModel> getIntroMj(String url) async {
     String body = await getBody(url);
     if (body == null) return null;
@@ -475,10 +493,24 @@ class NetUtils {
   static Future<String> getVideoUrl(String url) async {
     Dio _dio = DioFactory.getInstance().getDio();
     Response infos = await _dio.get(url);
-    print("videoURl == " + infos.data.toString());
-    Map<String, dynamic> datas = infos.data;
-    List<dynamic> videData = datas['stream'];
-    String videoM3 = videData[0]['m3u8_url'];
-    return videoM3;
+    List<String> bodys = infos.data.toString().split(',').map((str){
+      if(str.contains("http")) {
+        str = str.split('\$').map((f){
+          if(f.contains('http'))
+            return f;
+          return '';
+        }).toList().toString();
+        str = str.replaceAll('[,', '');
+        return str;
+      }
+      return '';
+    }).toList().toString().split(']').toString().replaceAll('[', '').replaceAll(']', '').split(',');
+    List<String> urls = List();
+    for(String url in bodys){
+      if (url != null && url.trim().isNotEmpty)
+        urls.add(url);
+    }
+    print("getVideoUrl===" + urls.toString());
+    return urls[0];
   }
 }

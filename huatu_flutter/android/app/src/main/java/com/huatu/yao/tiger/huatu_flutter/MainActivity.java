@@ -1,7 +1,9 @@
 package com.huatu.yao.tiger.huatu_flutter;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -17,6 +19,8 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 public class MainActivity extends BaseActivity {
     WebView webView;
     String videoUrl = null;
+    String jsonUrl = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,12 +47,15 @@ public class MainActivity extends BaseActivity {
                 public void onLoadResource(WebView view, String url) {
                     super.onLoadResource(view, url);
                     Log.d("Main..", "onLoadResource.url.." + url);
-                    if (url.endsWith("index.m3u8")){
+                    if (videoUrl != null && !TextUtils.isEmpty(videoUrl))
+                        return;
+                    if (url.endsWith(".m3u8")) {
                         videoUrl = url;
-                    }else if (url.contains("vid=") && (url.contains("mp4") || url.contains("m3u8"))) {
-                        videoUrl = url;
+                    } else if (url.contains("vid=") && (url.contains("mp4") || url.contains("m3u8"))) {
+                        videoUrl = url.split("vid=")[1];
                         Log.d("vid==", url);
-                    }
+                    } else if (url.contains("playdata"))
+                        jsonUrl = url;
                     if (videoUrl != null) {
                         FlutterPluginCounter.onSendValue(videoUrl);
                         view.stopLoading();
@@ -58,14 +65,24 @@ public class MainActivity extends BaseActivity {
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
-                    videoUrl = url;
                     Log.d("Main..", "onPageFinished.url.." + videoUrl);
-                    if (videoUrl != null && !videoUrl.isEmpty())
-                        FlutterPluginCounter.onSendValue(videoUrl);
-                    else
-                        FlutterPluginCounter.onFail(url, "无法播放", "解析不到videourl");
+                    if (videoUrl == null || TextUtils.isEmpty(url))
+                        FlutterPluginCounter.onFail(url, "无法播放", jsonUrl);
+//                    else
+//                        FlutterPluginCounter.onFail(url, "无法播放", "解析不到videourl");
                 }
 
+
+            });
+            webView.setWebChromeClient(new WebChromeClient() {
+                @Override
+                public void onProgressChanged(WebView view, int newProgress) {
+                    super.onProgressChanged(view, newProgress);
+                    Log.d("Main..", "onProgressChanged.." + newProgress);
+                    if (newProgress == 100 && videoUrl == null)
+                        FlutterPluginCounter.onFail(jsonUrl, "无法播放", jsonUrl);
+
+                }
             });
         }
     }
@@ -76,12 +93,14 @@ public class MainActivity extends BaseActivity {
         FlutterPluginCounter.registerWith(registrar.registrarFor(FlutterPluginCounter.CHANNEL));
     }
 
-     FlutterAndroidListener mListener = new FlutterAndroidListener() {
+    FlutterAndroidListener mListener = new FlutterAndroidListener() {
         @Override
         public void onFlutterToAct(String method, Map<String, String> args, MethodChannel.Result result) {
             result.success("ok");
-            Log.d("main...vid..",method + "main...vid.." + args.toString());
-            if (method.equals("webview_video") && args.containsKey("getVideo")){
+            Log.d("main...vid..", method + "main...vid.." + args.toString());
+            if (method.equals("webview_video") && args.containsKey("getVideo")) {
+                videoUrl = null;
+                jsonUrl = null;
                 webView.loadUrl(args.get("getVideo"));
             }
         }

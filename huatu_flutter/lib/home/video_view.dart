@@ -1,12 +1,22 @@
 import 'dart:async';
 
-import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:huatu_flutter/model/home_model.dart';
+import 'package:huatu_flutter/movie/video_controler.dart';
+import 'package:huatu_flutter/utils/jump_natvie.dart';
 import 'package:huatu_flutter/utils/net_utils.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/src/chewie_player.dart';
+
 
 class VideoScaffold extends StatefulWidget {
+  String title;
+  List<TvInfo> playLists;
+
+  VideoScaffold({this.title, this.playLists});
+
   @override
   State<StatefulWidget> createState() => _VideoScaffoldState();
 }
@@ -14,7 +24,10 @@ class VideoScaffold extends StatefulWidget {
 class _VideoScaffoldState extends State<VideoScaffold> {
   String url;
   bool isSucces;
-
+  VideoPlayerController _controller;
+  ChewieController _chewieController;
+  bool _isPlaying = false;
+  bool _hasErro = false;
   static const counterPlugin = const EventChannel('com.huatu.counter/plugin');
 
   StreamSubscription _subscription = null;
@@ -29,19 +42,56 @@ class _VideoScaffoldState extends State<VideoScaffold> {
 
   void cancle() {
     if (_subscription != null) _subscription.cancel();
+    if (_controller != null) _controller.dispose();
+    if (_chewieController != null) _chewieController.dispose();
   }
 
   void onEvent(Object event) {
+    if (url == event) return;
     url = event;
     isSucces = true;
-    print("url....jjj  " + url);
-    setState(() {});
+    print("==onEvent==" + url);
+    initVideo();
+  }
+
+  void initVideo() {
+    _controller = VideoPlayerController.network(this.url)
+      // 播放状态
+      ..addListener(() {
+        _hasErro = _controller.value.hasError;
+        final bool isPlaying = _controller.value.isPlaying;
+        if (isPlaying != _isPlaying) {
+          setState(() {
+            _isPlaying = isPlaying;
+          });
+        }
+      })
+      // 在初始化完成后必须更新界面
+      ..initialize().then((_) {
+        _chewieController = ChewieController(
+          videoPlayerController: _controller,
+          aspectRatio: _controller.value.aspectRatio,
+          customControls: MaterialControls(
+            title: widget.title,
+          ),
+          showControls: true,
+        );
+        setState(() {});
+      });
   }
 
   void _onError(Object error) {
-    setState(() {
-      isSucces = false;
-      Navigator.pop(context);
+    PlatformException exception = error;
+    url = exception.message != null && exception.message.isNotEmpty ? exception.message : exception.details;
+    print("_onError == " + url);
+    if(url.contains('playdata')){
+      NetUtils.getVideoUrl(url).then((value){
+        onEvent(value);
+      });
+    }else
+      setState(() {
+      isSucces = true;
+      _hasErro = true;
     });
   }
 
@@ -71,19 +121,76 @@ class _VideoScaffoldState extends State<VideoScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return (url == null || url.isEmpty || !isSucces)
-        ? Center(
-            child: CircularProgressIndicator(backgroundColor: Colors.yellow,))
-        : Container(
-            color: Colors.white,
-            child: new WebviewScaffold(
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.pink[100],
+        title: Text(
+          widget.title,
+          style: TextStyle(color: Colors.black),
+        ),
+      ),
+      backgroundColor: Colors.white,
+      body: (url == null || url.isEmpty || !isSucces)
+          ? Center(
+              child: CircularProgressIndicator(
+              backgroundColor: Colors.pink,
+            ))
+          : ListView(
+              children: <Widget>[
+                createBody(),
+                createTvNum(widget.playLists),
+              ],
+            ),
+    );
+  }
+
+  Widget createBody() {
+    return Container(
+      color: Colors.grey,
+      child: _hasErro
+          ? new WebviewScaffold(
               url: url,
               withZoom: false,
               withLocalStorage: true,
+            )
+          : Chewie(
+              controller: _chewieController,
             ),
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            alignment: Alignment.center,
-          );
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.width * 9 / 16,
+      alignment: Alignment.topCenter,
+    );
+  }
+
+  createTvNum(List<TvInfo> playLists) {
+    return GridView.builder(
+      padding: EdgeInsets.all(10),
+      itemCount: playLists.length,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          //单个子Widget的水平最大宽度
+          maxCrossAxisExtent: 60,
+          //水平单个子Widget之间间距
+          mainAxisSpacing: 10.0,
+          //垂直单个子Widget之间间距
+          crossAxisSpacing: 10.0,
+          childAspectRatio: 4 / 3),
+      itemBuilder: (context, index) {
+        TvInfo f = playLists[index];
+        return RaisedButton(
+          onPressed: () {
+            JumpNativie()
+                .jumpToNativeWithValue("webview_video", "getVideo", f.path);
+          },
+          child: Text(
+            f.number,
+            style: TextStyle(fontSize: 8),
+          ),
+          color: Colors.pink[200],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        );
+      },
+    );
   }
 }

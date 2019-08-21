@@ -10,7 +10,7 @@ import 'video_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ChewieDemo extends StatefulWidget {
-  ChewieDemo({this.title = 'Chewie Demo', this.url, this.baseUrl});
+  ChewieDemo({this.title = '播放中', this.url, this.baseUrl});
 
   final String title;
   String url;
@@ -123,20 +123,20 @@ class _ChewieDemoState extends State<ChewieDemo> {
           mainAxisSpacing: 10.0,
           //垂直单个子Widget之间间距
           crossAxisSpacing: 10.0,
-          childAspectRatio: 1),
+          childAspectRatio: 4/3),
       itemBuilder: (context, index) {
         TvInfo f = _detailModel.playLists[index];
         return RaisedButton(
           onPressed: () {
-            _jumpVideo(f.path);
+            _jumpVideo(f.path, f.title);
           },
           child: Text(
             f.number,
             style: TextStyle(fontSize: 8),
           ),
-          color: Colors.lightGreenAccent,
+          color: Colors.pink[200],
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         );
       },
     );
@@ -230,7 +230,7 @@ class _ChewieDemoState extends State<ChewieDemo> {
     );
   }
 
-  _jumpVideo(String url) {
+  _jumpVideo(String url, String title) {
     if (!url.startsWith('http')) url = widget.baseUrl + url;
     _jumpNativie
         .jumpToNativeWithValue("webview_video", "getVideo", url)
@@ -238,7 +238,7 @@ class _ChewieDemoState extends State<ChewieDemo> {
       print("videoUrl == " + value);
       setState(() {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => VideoScaffold()));
+            context, MaterialPageRoute(builder: (context) => VideoScaffold(title: widget.title, playLists: _detailModel.playLists)));
       });
     });
   }
