@@ -510,7 +510,6 @@ class NetUtils {
       if (url != null && url.trim().isNotEmpty)
         urls.add(url);
     }
-    print("getVideoUrl===" + urls.toString());
     return urls[0];
   }
 }

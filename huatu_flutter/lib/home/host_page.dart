@@ -1,9 +1,14 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:huatu_flutter/model/home_model.dart';
 import 'package:huatu_flutter/utils/net_utils.dart';
 import 'detail_page.dart';
+import 'nav_head.dart';
 import 'search_page.dart';
+import 'menu_header_icon.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -79,12 +84,14 @@ class _HostPageState extends State<HostPage> {
   }
 
   fetchDatas(String url) {
-
     if (!url.contains(_baseUrl)) url = _baseUrl + url;
     if (_mCatogryTypeList.containsKey(url))
       _currentTypes = _mCatogryTypeList[url];
     if (_mCataList.containsKey(url)) _currentCatogrList = _mCataList[url];
-    if (_currentCatogrList == null || _currentCatogrList.isEmpty || !_mCatogryTypeList.containsKey(url) || !_mCataList.containsKey(url)) {
+    if (_currentCatogrList == null ||
+        _currentCatogrList.isEmpty ||
+        !_mCatogryTypeList.containsKey(url) ||
+        !_mCataList.containsKey(url)) {
       NetUtils.fetchDataByCategory(url).then((value) {
         setState(() {
           _currentTypes = value[0];
@@ -455,10 +462,45 @@ class _HostPageState extends State<HostPage> {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> _scaffoldKey =
+        new GlobalKey<ScaffoldState>();
+//    Widget userHeader = UserAccountsDrawerHeader(
+//        accountName: new Text('Tom'),
+//        accountEmail: new Text('tom@xxx.com'),
+//        currentAccountPicture: CircleAvatar(
+//          backgroundColor: Colors.white30,
+//          backgroundImage: AssetImage('images/pic1.jpg'),
+//          radius: 35.0,
+//        ));
+
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: tvCataogryView(),
+        leading: FlatButton(
+          child: MenuIcon(Colors.black),
+          onPressed: () {
+            _scaffoldKey.currentState.openDrawer();
+          },
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.search,
+              size: 28,
+              color: Colors.black,
+            ),
+            onPressed: () => Navigator.push(
+              context,
+              new MaterialPageRoute(
+                  builder: (context) => SearchPage(
+                        placeholder: "一拳超人",
+                        path: _baseUrl + _searchPath,
+                      )),
+            ),
+          )
+        ],
       ),
       body: mHomeModel == null
           ? Center(
@@ -468,6 +510,98 @@ class _HostPageState extends State<HostPage> {
               shrinkWrap: true,
               children: getChildren(),
             ),
+      drawer: Drawer(
+        child: ListView(padding: EdgeInsets.zero, children: <Widget>[
+//          createDrawHeader(),
+//          userHeader,
+          NavHead(),
+          ListTile(
+            title: Text('Item 1'),
+            leading: new CircleAvatar(
+              child: new Icon(Icons.school),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text('Item 2'),
+            leading: new CircleAvatar(
+              child: new Text('B2'),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text('Item 3'),
+            leading: new CircleAvatar(
+              child: new Icon(Icons.list),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ]),
+      ),
+    );
+  }
+
+  createDrawHeader() {
+    final size = MediaQuery.of(context).size;
+    final netImageHeight = max(size.width, size.height) / 4;
+    return DrawerHeader(
+      padding: EdgeInsets.zero,
+      /* padding置为0 */
+      child: new Stack(children: <Widget>[
+        /* 用stack来放背景图片 */
+        new SvgPicture.asset(
+          "svgs/bg.svg",
+          width: MediaQuery.of(context).size.width - 50,
+          height: netImageHeight,
+        ),
+        new Align(
+          /* 先放置对齐 */
+          alignment: FractionalOffset.bottomLeft,
+          child: Container(
+            height: 70.0,
+            margin: EdgeInsets.only(left: 12.0, bottom: 12.0),
+            child: new Row(
+              mainAxisSize: MainAxisSize.min,
+              /* 宽度只用包住子组件即可 */
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                new CircleAvatar(
+                  backgroundImage: AssetImage('images/pic1.jpg'),
+                  radius: 35.0,
+                ),
+                new Container(
+                  margin: EdgeInsets.only(left: 6.0),
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, // 水平方向左对齐
+                    mainAxisAlignment: MainAxisAlignment.center, // 竖直方向居中
+                    children: <Widget>[
+                      new Text(
+                        "Tom",
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white),
+                      ),
+                      new Text(
+                        "What's up",
+                        style:
+                            new TextStyle(fontSize: 14.0, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]),
     );
   }
 

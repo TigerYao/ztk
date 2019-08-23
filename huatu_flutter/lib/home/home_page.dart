@@ -14,8 +14,8 @@ class _HomePageState extends State<HomePage> {
   static List tabData = [
     {'text': '动漫', 'icon': Icon(Icons.music_video)},
     {'text': '剧集', 'icon': Icon(Icons.queue_music)},
-    {'text': '收藏', 'icon': Icon(Icons.favorite)},
-    {'text': '我的', 'icon': Icon(Icons.person)},
+//    {'text': '收藏', 'icon': Icon(Icons.favorite)},
+//    {'text': '我的', 'icon': Icon(Icons.person)},
   ];
   List<BottomNavigationBarItem> _bottomTabs = [];
   int _currentIndex = 0;
@@ -31,9 +31,9 @@ class _HomePageState extends State<HomePage> {
 
     _listPages
       ..add(HostPage(0))
-      ..add(HostPage(1))
-      ..add(Text('ds'))
-      ..add(Text('dd'));
+      ..add(HostPage(1));
+//      ..add(Text('ds'))
+//      ..add(Text('dd'));
   }
 
   @override
