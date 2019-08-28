@@ -49,9 +49,9 @@ class _NavHeadState extends State<NavHead> with SingleTickerProviderStateMixin {
       height: navHeaderHeight,
       decoration: BoxDecoration(
           gradient: LinearGradient(colors: [
-        Colors.pink,
-        Colors.pinkAccent,
-        Colors.pink.withOpacity(0.6),
+        Colors.pink[100],
+        Colors.pink[200],
+        Colors.pink[300].withOpacity(0.6),
       ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
       child: Stack(
         children: <Widget>[
@@ -118,6 +118,27 @@ class _NavHeadState extends State<NavHead> with SingleTickerProviderStateMixin {
                 circleFiveRadius,
             bottom: circleFiveRadius - 50,
           ),
+          Positioned(
+            top: navHeaderHeight - 80,
+            left: 30,
+            child: CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.white,
+              child:Icon(Icons.people)
+            ),
+          ),
+          Positioned(
+            top: navHeaderHeight - 70,
+            left: 100,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('姓名是个啥', style: TextStyle(color: Colors.black, fontSize: 16),),
+                Text('个人信息简介个人信息简介个人信息简介个人信息简介个人信息简介', style: TextStyle(color: Colors.black54, fontSize: 12)),
+              ],
+            )
+          )
         ],
       ),
     );
@@ -162,7 +183,7 @@ class _NavHeadState extends State<NavHead> with SingleTickerProviderStateMixin {
 
   List<Color> getRandomColor(BuildContext context, {int times}) {
     final List<Color> randomColorList = [
-     Colors.blue[300],
+      Colors.blue[300],
       Colors.blue[200],
       Colors.blue[500].withOpacity(0.8)
     ];
@@ -206,7 +227,7 @@ class _NavHeadState extends State<NavHead> with SingleTickerProviderStateMixin {
             height: randomHeight,
             decoration: BoxDecoration(
                 borderRadius:
-                BorderRadius.all(Radius.circular(randomWidth / 2)),
+                    BorderRadius.all(Radius.circular(randomWidth / 2)),
                 gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -220,7 +241,6 @@ class _NavHeadState extends State<NavHead> with SingleTickerProviderStateMixin {
     return list;
   }
 }
-
 
 class CustomRect extends CustomClipper<Rect> {
   @override

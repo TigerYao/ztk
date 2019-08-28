@@ -516,25 +516,25 @@ class _HostPageState extends State<HostPage> {
 //          userHeader,
           NavHead(),
           ListTile(
-            title: Text('Item 1'),
+            title: Text('我的账户'),
             leading: new CircleAvatar(
-              child: new Icon(Icons.school),
+              child: new Icon(Icons.account_box),
             ),
             onTap: () {
               Navigator.pop(context);
             },
           ),
           ListTile(
-            title: Text('Item 2'),
+            title: Text('我的收藏'),
             leading: new CircleAvatar(
-              child: new Text('B2'),
+              child: Icon(Icons.collections),
             ),
             onTap: () {
               Navigator.pop(context);
             },
           ),
           ListTile(
-            title: Text('Item 3'),
+            title: Text('播放记录'),
             leading: new CircleAvatar(
               child: new Icon(Icons.list),
             ),
