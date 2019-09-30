@@ -120,7 +120,7 @@ class _NavHeadState extends State<NavHead> with SingleTickerProviderStateMixin {
           ),
           Positioned(
             top: navHeaderHeight - 80,
-            left: 30,
+            left: 20,
             child: CircleAvatar(
               radius: 30,
               backgroundColor: Colors.white,
@@ -129,7 +129,8 @@ class _NavHeadState extends State<NavHead> with SingleTickerProviderStateMixin {
           ),
           Positioned(
             top: navHeaderHeight - 70,
-            left: 100,
+            left: 90,
+            right: 20,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,

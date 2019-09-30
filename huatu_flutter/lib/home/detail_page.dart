@@ -110,6 +110,8 @@ class _ChewieDemoState extends State<ChewieDemo> {
 //    );
   }
 
+  String _currentPath = '';
+
   createTvNum() {
     return GridView.builder(
       padding: EdgeInsets.all(10),
@@ -118,26 +120,49 @@ class _ChewieDemoState extends State<ChewieDemo> {
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           //单个子Widget的水平最大宽度
-          maxCrossAxisExtent: 60,
+          maxCrossAxisExtent: 80,
           //水平单个子Widget之间间距
           mainAxisSpacing: 10.0,
           //垂直单个子Widget之间间距
-          crossAxisSpacing: 10.0,
-          childAspectRatio: 4/3),
+          crossAxisSpacing: 2.0,
+          childAspectRatio: 4 / 3),
       itemBuilder: (context, index) {
         TvInfo f = _detailModel.playLists[index];
-        return RaisedButton(
-          onPressed: () {
-            _jumpVideo(f.path, f.title);
-          },
-          child: Text(
-            f.number,
-            style: TextStyle(fontSize: 8),
-          ),
-          color: Colors.pink[200],
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        return Padding(
+          padding: EdgeInsets.all(2.0),
+          child: ChoiceChip(
+              label: Text(f.number),
+              labelStyle: TextStyle(
+                fontSize: 12,
+              ),
+              //未选定的时候背景
+              backgroundColor: Colors.pink[500],
+              selectedColor: Colors.pink[200],
+              //被禁用得时候背景
+              disabledColor: Colors.pink[100],
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onSelected: (bool sel) {
+                if (sel) {
+                  _currentPath = f.path;
+                  _jumpVideo(f.path, f.title);
+                  setState(() {});
+                }
+              },
+              selected: _currentPath == f.path),
         );
+
+//          RaisedButton(
+//          onPressed: () {
+//            _jumpVideo(f.path, f.title);
+//          },
+//          child: Text(
+//            f.number,
+//            style: TextStyle(fontSize: 8),
+//          ),
+//          color: Colors.pink[200],
+//          shape:
+//              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+//        );
       },
     );
   }
@@ -151,7 +176,9 @@ class _ChewieDemoState extends State<ChewieDemo> {
         children: <Widget>[
           new CachedNetworkImage(
             imageUrl: _detailModel.currentInfo.picUrl,
-            placeholder: (context, url) => Center(child: new CircularProgressIndicator(),),
+            placeholder: (context, url) => Center(
+              child: new CircularProgressIndicator(),
+            ),
             errorWidget: (context, url, error) => new SizedBox.fromSize(),
             fit: BoxFit.fill,
             height: MediaQuery.of(context).size.width * 9 / 16,
@@ -170,7 +197,9 @@ class _ChewieDemoState extends State<ChewieDemo> {
             width: 120,
             child: new CachedNetworkImage(
               imageUrl: _detailModel.currentInfo.picUrl,
-              placeholder: (context, url) => Center(child: new CircularProgressIndicator(),),
+              placeholder: (context, url) => Center(
+                child: new CircularProgressIndicator(),
+              ),
               errorWidget: (context, url, error) => new Icon(Icons.landscape),
               fit: BoxFit.cover,
 //              height: MediaQuery.of(context).size.width * 9 / 16,
@@ -231,14 +260,24 @@ class _ChewieDemoState extends State<ChewieDemo> {
   }
 
   _jumpVideo(String url, String title) {
-    if (!url.startsWith('http')) url = widget.baseUrl + url;
+    String requestUrl = url;
+    if (!requestUrl.startsWith('http'))
+      requestUrl = widget.baseUrl + requestUrl;
     _jumpNativie
-        .jumpToNativeWithValue("webview_video", "getVideo", url)
+        .jumpToNativeWithValue("webview_video", "getVideo", requestUrl)
         .then((value) {
       print("videoUrl == " + value);
       setState(() {
+        _currentPath = null;
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => VideoScaffold(title: widget.title, playLists: _detailModel.playLists)));
+            context,
+            MaterialPageRoute(
+                builder: (context) => VideoScaffold(
+                      title: widget.title,
+                      playLists: _detailModel.playLists,
+                      currentPath: url,
+                      baseUrl: widget.baseUrl,
+                    )));
       });
     });
   }

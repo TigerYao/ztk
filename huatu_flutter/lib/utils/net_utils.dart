@@ -11,12 +11,13 @@ import 'urlencode.dart';
 class NetUtils {
   static const List weekNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   static const List navNames = ['最近连载', '2019新剧推荐', '即将开播'];
-  static const String baseUrl = "http://m.imomoe.jp"; //"http://m.yhdm.tv";
+  static const String baseUrl = "http://m.imomoe.io/"; //"http://m.yhdm.tv";
   static const String meiju_91base = "https://91mjw.com";
   static const String meiju_base = meiju_91base; //"http://m.meijutt.com";
   static Future<String> getBody(String url) async {
-    var response = await http.get(url);
     print('getBody.url...' + url + '.....');
+    var response = await http.get(url);
+
     if (response.statusCode == 200) {
       List<Element> headerss =
           parse(response.body).head.querySelectorAll("meta");
@@ -35,16 +36,16 @@ class NetUtils {
   }
 
   static Future<String> postBody(String url, String keywork) async {
-    print('postBody.url...' + url + '.....' + keywork);
     url = url + "?searchword=" + keywork;
+    print('postBody.url...' + url + '.....' + keywork);
     var client = new http.Client();
     var request = new http.Request('POST', Uri.parse(url));
     var body = {'searchword': keywork};
     request.bodyFields = body;
     var response = await client.send(request);
     if (response.statusCode == 200) {
-      String htmBody = gbk.decode(await response.stream
-          .toBytes()); //gbk.decode(response.stream.toString());
+      String htmBody = await response.stream.bytesToString();
+     // gbk.decode(await response.stream.toBytes()); //gbk.decode(response.stream.toString());
       print('postBody....' + htmBody);
       return htmBody;
     }
@@ -372,6 +373,7 @@ class NetUtils {
         document.getElementById('video_list_li').querySelectorAll('a');
     for (Element numEl in numList) {
       String num = numEl.text;
+      print("...numEl.."+ numEl.outerHtml );
       String path = url + '/vplay/' + numEl.attributes['id'] + '.html';
       detailModel.playLists.add(TvInfo(number: num, path: path));
     }

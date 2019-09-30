@@ -187,7 +187,8 @@ class _HostPageState extends State<HostPage> {
               ),
             ),
           );
-        });
+        },
+    );
 
 //      Row(
 //      mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -464,14 +465,6 @@ class _HostPageState extends State<HostPage> {
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey =
         new GlobalKey<ScaffoldState>();
-//    Widget userHeader = UserAccountsDrawerHeader(
-//        accountName: new Text('Tom'),
-//        accountEmail: new Text('tom@xxx.com'),
-//        currentAccountPicture: CircleAvatar(
-//          backgroundColor: Colors.white30,
-//          backgroundImage: AssetImage('images/pic1.jpg'),
-//          radius: 35.0,
-//        ));
 
     return Scaffold(
       key: _scaffoldKey,

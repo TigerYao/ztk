@@ -10,12 +10,13 @@ import 'package:huatu_flutter/utils/net_utils.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/src/chewie_player.dart';
 
-
 class VideoScaffold extends StatefulWidget {
   String title;
   List<TvInfo> playLists;
+  String currentPath = '';
+  String baseUrl = '';
 
-  VideoScaffold({this.title, this.playLists});
+  VideoScaffold({this.title, this.playLists, this.currentPath, this.baseUrl});
 
   @override
   State<StatefulWidget> createState() => _VideoScaffoldState();
@@ -82,17 +83,19 @@ class _VideoScaffoldState extends State<VideoScaffold> {
 
   void _onError(Object error) {
     PlatformException exception = error;
-    url = exception.message != null && exception.message.isNotEmpty ? exception.message : exception.details;
+    url = exception.message != null && exception.message.isNotEmpty
+        ? exception.message
+        : exception.details;
     print("_onError == " + url);
-    if(url.contains('playdata')){
-      NetUtils.getVideoUrl(url).then((value){
+    if (url.contains('playdata')) {
+      NetUtils.getVideoUrl(url).then((value) {
         onEvent(value);
       });
-    }else
+    } else
       setState(() {
-      isSucces = true;
-      _hasErro = true;
-    });
+        isSucces = true;
+        _hasErro = true;
+      });
   }
 
   @override
@@ -130,7 +133,7 @@ class _VideoScaffoldState extends State<VideoScaffold> {
         ),
       ),
       backgroundColor: Colors.white,
-      body: (url == null || url.isEmpty || !isSucces)
+      body: (widget.playLists == null || widget.playLists.isEmpty)
           ? Center(
               child: CircularProgressIndicator(
               backgroundColor: Colors.pink,
@@ -147,15 +150,20 @@ class _VideoScaffoldState extends State<VideoScaffold> {
   Widget createBody() {
     return Container(
       color: Colors.grey,
-      child: _hasErro
-          ? new WebviewScaffold(
-              url: url,
-              withZoom: false,
-              withLocalStorage: true,
-            )
-          : Chewie(
-              controller: _chewieController,
-            ),
+      child: (url == null || url.isEmpty || !isSucces)
+          ? Center(
+              child: CircularProgressIndicator(
+              backgroundColor: Colors.pink,
+            ))
+          : _hasErro
+              ? new WebviewScaffold(
+                  url: url,
+                  withZoom: false,
+                  withLocalStorage: true,
+                )
+              : Chewie(
+                  controller: _chewieController,
+                ),
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.width * 9 / 16,
       alignment: Alignment.topCenter,
@@ -170,26 +178,56 @@ class _VideoScaffoldState extends State<VideoScaffold> {
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           //单个子Widget的水平最大宽度
-          maxCrossAxisExtent: 60,
+          maxCrossAxisExtent: 80,
           //水平单个子Widget之间间距
           mainAxisSpacing: 10.0,
           //垂直单个子Widget之间间距
-          crossAxisSpacing: 10.0,
+          crossAxisSpacing: 2.0,
           childAspectRatio: 4 / 3),
       itemBuilder: (context, index) {
         TvInfo f = playLists[index];
-        return RaisedButton(
-          onPressed: () {
-            JumpNativie()
-                .jumpToNativeWithValue("webview_video", "getVideo", f.path);
-          },
-          child: Text(
-            f.number,
-            style: TextStyle(fontSize: 8),
-          ),
-          color: Colors.pink[200],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        String videoPath = f.path;
+        if (!videoPath.startsWith("http")) {
+          videoPath = widget.baseUrl + f.path;
+        }
+        return Padding(
+          padding: EdgeInsets.all(2.0),
+          child: ChoiceChip(
+              label: Text(f.number),
+              labelStyle: TextStyle(
+                fontSize: 12,
+              ),
+              //未选定的时候背景
+              backgroundColor: Colors.pink[500],
+              selectedColor: Colors.pink[200],
+              //被禁用得时候背景
+              disabledColor: Colors.pink[100],
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onSelected: (bool sel) {
+                if (sel) {
+                  isSucces = false;
+                  JumpNativie().jumpToNativeWithValue(
+                      "webview_video", "getVideo", videoPath);
+                  setState(() {
+                    widget.currentPath = f.path;
+                  });
+                }
+              },
+              selected: widget.currentPath == f.path),
         );
+//        return RaisedButton(
+//          onPressed: () {
+//            JumpNativie()
+//                .jumpToNativeWithValue("webview_video", "getVideo", f.path);
+//          },
+//          child:
+//          Text(
+//            f.number,
+//            style: TextStyle(fontSize: 8),
+//          ),
+//          color: Colors.pink[200],
+//          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+//        );
       },
     );
   }

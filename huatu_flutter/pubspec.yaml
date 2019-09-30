@@ -36,6 +36,7 @@ dependencies:
   #状态管理
   provider: ^3.0.0+1
   flutter_svg: ^0.13.1
+  sqflite: ^1.1.5
 
 dev_dependencies:
   flutter_test:
