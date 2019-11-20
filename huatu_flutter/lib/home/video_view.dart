@@ -70,13 +70,13 @@ class _VideoScaffoldState extends State<VideoScaffold> {
       // 在初始化完成后必须更新界面
       ..initialize().then((_) {
         _chewieController = ChewieController(
-          videoPlayerController: _controller,
-          aspectRatio: _controller.value.aspectRatio,
-          customControls: MaterialControls(
-            title: widget.title,
-          ),
-          showControls: true,
-        );
+            videoPlayerController: _controller,
+            aspectRatio: _controller.value.aspectRatio,
+            customControls: MaterialControls(
+              title: widget.title,
+            ),
+            showControls: true,
+            autoPlay: true);
         setState(() {});
       });
   }
